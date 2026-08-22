@@ -12,4 +12,9 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // cPanel's Node.js App runs a plain Node process, not Cloudflare Workers —
+  // override the default cloudflare-module preset so the build targets Node.
+  nitro: {
+    preset: "node-server",
+  },
 });
