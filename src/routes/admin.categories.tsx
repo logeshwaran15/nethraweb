@@ -1,23 +1,9 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAdmin, type AdminCategory } from "@/lib/admin-store";
 import { uploadImage } from "@/lib/api";
 import { showToast } from "@/lib/toast";
-
-export const Route = createFileRoute("/admin/categories")({
-  head: () => ({
-    meta: [
-      { title: "Categories — Nethra's Admin" },
-      { name: "description", content: "Create and edit store categories for stencils and accessories." },
-      { property: "og:title", content: "Categories — Nethra's Admin" },
-      { property: "og:description", content: "Create and edit store categories." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: AdminCategories,
-});
 
 const emptyCategory: AdminCategory = {
   slug: "",
@@ -34,7 +20,7 @@ const slugify = (s: string) =>
 const inputCls =
   "w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/40";
 
-function AdminCategories() {
+export default function AdminCategories() {
   const { categories, products, saveCategory, deleteCategory } = useAdmin();
   const [editing, setEditing] = useState<{
     draft: AdminCategory;

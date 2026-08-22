@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import {
   CheckCheck,
   HelpCircle,
@@ -178,8 +178,7 @@ export function Chatbot() {
                           {m.text}
                           {m.orderId && (
                             <Link
-                              to="/track"
-                              search={{ order: m.orderId }}
+                              to={`/track?order=${m.orderId}`}
                               className="mt-2 flex items-center justify-center gap-1.5 rounded-full gradient-maroon py-2 text-xs font-semibold text-primary-foreground"
                             >
                               <Truck className="h-3.5 w-3.5" /> Track Order

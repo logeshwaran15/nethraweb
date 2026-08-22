@@ -1,21 +1,9 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { Heart, LogOut, Lock, Mail, MapPin, Package, Phone, User } from "lucide-react";
 import { useState } from "react";
 import { Screen } from "@/components/shop/AppChrome";
 import { login as apiLogin, register as apiRegister } from "@/lib/api";
 import { useAuth } from "@/lib/auth-store";
-
-export const Route = createFileRoute("/account")({
-  head: () => ({
-    meta: [
-      { title: "My Account — Nethra's" },
-      { name: "description", content: "Sign in or create an account with Nethra's." },
-      { property: "og:title", content: "My Account — Nethra's" },
-      { property: "og:description", content: "Sign in or create an account with Nethra's." },
-    ],
-  }),
-  component: AccountPage,
-});
 
 const links = [
   { to: "/orders", label: "My Orders", icon: Package },
@@ -23,7 +11,7 @@ const links = [
   { to: "/track", label: "Track Order", icon: MapPin },
 ] as const;
 
-function AccountPage() {
+export default function AccountPage() {
   const navigate = useNavigate();
   const { user, login: setLoggedInUser, logout } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -45,7 +33,7 @@ function AccountPage() {
           : await apiRegister(fullName, email, phone, password);
       setLoggedInUser(loggedInUser);
       if (loggedInUser.Role === "Admin") {
-        navigate({ to: redirectTo as "/admin" });
+        navigate(redirectTo);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

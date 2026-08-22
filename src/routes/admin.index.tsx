@@ -1,21 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { IndianRupee, Package, ShoppingBag, TrendingUp, AlertTriangle } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAdmin } from "@/lib/admin-store";
 import { inr, mockOrders } from "@/lib/mock-data";
-
-export const Route = createFileRoute("/admin/")({
-  head: () => ({
-    meta: [
-      { title: "Dashboard — Nethra's Admin" },
-      { name: "description", content: "Sales, orders and inventory overview for Nethra's." },
-      { property: "og:title", content: "Dashboard — Nethra's Admin" },
-      { property: "og:description", content: "Sales, orders and inventory overview." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: AdminDashboard,
-});
 
 const salesByDay = [
   { day: "Mon", value: 42 },
@@ -27,7 +14,7 @@ const salesByDay = [
   { day: "Sun", value: 61 },
 ];
 
-function AdminDashboard() {
+export default function AdminDashboard() {
   const { products, categories } = useAdmin();
   const revenue = mockOrders.reduce((s, o) => s + o.total, 0);
   const lowStock = products.filter((p) => p.stock <= 8);

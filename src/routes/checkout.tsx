@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { MapPin, Plus, ShieldCheck, Trash2 } from "lucide-react";
 import { inr } from "@/lib/mock-data";
@@ -16,19 +16,7 @@ import {
   type DeliveryZoneRule,
 } from "@/lib/delivery";
 
-export const Route = createFileRoute("/checkout")({
-  head: () => ({
-    meta: [
-      { title: "Checkout — Nethra's" },
-      { name: "description", content: "Enter your shipping details and choose a delivery method." },
-      { property: "og:title", content: "Checkout — Nethra's" },
-      { property: "og:description", content: "Shipping details and delivery options." },
-    ],
-  }),
-  component: CheckoutPage,
-});
-
-function CheckoutPage() {
+export default function CheckoutPage() {
   const { cart, subtotal, discount, shippingInfo, setShippingInfo, setShippingFee } = useShop();
   const { user } = useAuth();
   const [method, setMethod] = useState<"standard" | "express">("standard");

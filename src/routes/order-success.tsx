@@ -1,27 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link, useSearchParams } from "react-router-dom";
 import { CheckCircle2, Printer } from "lucide-react";
 import { useEffect, useState } from "react";
 import { inr } from "@/lib/mock-data";
 import { apiGet } from "@/lib/api";
 import { Screen } from "@/components/shop/AppChrome";
 import { WhatsAppButton } from "@/components/shop/WhatsAppButton";
-
-type SearchParams = { order?: string | undefined };
-
-export const Route = createFileRoute("/order-success")({
-  validateSearch: (search: Record<string, unknown>): SearchParams => ({
-    order: typeof search["order"] === "string" ? search["order"] : undefined,
-  }),
-  head: () => ({
-    meta: [
-      { title: "Order Confirmed — Nethra's" },
-      { name: "description", content: "Your Nethra's order has been placed successfully." },
-      { property: "og:title", content: "Order Confirmed — Nethra's" },
-      { property: "og:description", content: "Thank you for shopping with Nethra's." },
-    ],
-  }),
-  component: SuccessPage,
-});
 
 type OrderRow = {
   Orderkey: string;
@@ -43,8 +26,9 @@ type OrderItemRow = {
   Price: string | number;
 };
 
-function SuccessPage() {
-  const { order: orderKey } = Route.useSearch();
+export default function SuccessPage() {
+  const [searchParams] = useSearchParams();
+  const orderKey = searchParams.get("order") ?? undefined;
   const [order, setOrder] = useState<OrderRow | null>(null);
   const [items, setItems] = useState<OrderItemRow[]>([]);
 

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "@/assets/a889bf53-43d8-42fc-b779-723c8ec5cf32.png";
 import {
   LayoutDashboard,
@@ -78,7 +78,7 @@ export function AdminLayout({
   const [profileOpen, setProfileOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { pathname } = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -92,7 +92,7 @@ export function AdminLayout({
 
   const logout = () => {
     setProfileOpen(false);
-    navigate({ to: "/" });
+    navigate("/");
   };
 
   const SideNav = (

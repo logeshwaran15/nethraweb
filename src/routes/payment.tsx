@@ -1,22 +1,10 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Banknote, CreditCard, Landmark, Smartphone, ShieldCheck } from "lucide-react";
 import { inr } from "@/lib/mock-data";
 import { Screen } from "@/components/shop/AppChrome";
 import { useShop } from "@/lib/shop-store";
 import { showToast } from "@/lib/toast";
-
-export const Route = createFileRoute("/payment")({
-  head: () => ({
-    meta: [
-      { title: "Payment — Nethra's" },
-      { name: "description", content: "Choose UPI, card, net banking or cash on delivery." },
-      { property: "og:title", content: "Payment — Nethra's" },
-      { property: "og:description", content: "Choose your preferred payment method." },
-    ],
-  }),
-  component: PaymentPage,
-});
 
 const methods = [
   { id: "upi", icon: Smartphone, name: "UPI", sub: "Google Pay, PhonePe, Paytm" },
@@ -32,7 +20,7 @@ const methodLabels: Record<string, string> = {
   cod: "COD",
 };
 
-function PaymentPage() {
+export default function PaymentPage() {
   const navigate = useNavigate();
   const { total, subtotal, discount, cart, placeOrder } = useShop();
   const [selected, setSelected] = useState("upi");
@@ -44,7 +32,7 @@ function PaymentPage() {
     setPlacing(true);
     try {
       const order = await placeOrder(methodLabels[selected] ?? selected);
-      navigate({ to: "/order-success", search: { order: order.orderKey } });
+      navigate(`/order-success?order=${order.orderKey}`);
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Failed to place order", "error");
     } finally {

@@ -1,23 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
 import { useCatalog } from "@/lib/catalog-store";
 import { Screen } from "@/components/shop/AppChrome";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { useShop } from "@/lib/shop-store";
 
-export const Route = createFileRoute("/wishlist")({
-  head: () => ({
-    meta: [
-      { title: "Wishlist — Nethra's" },
-      { name: "description", content: "Your saved mehndi stencils, hair clips and accessories." },
-      { property: "og:title", content: "Wishlist — Nethra's" },
-      { property: "og:description", content: "Everything you saved for later at Nethra's." },
-    ],
-  }),
-  component: WishlistPage,
-});
-
-function WishlistPage() {
+export default function WishlistPage() {
   const { wishlist } = useShop();
   const { products } = useCatalog();
   const saved = products.filter((p) => wishlist.includes(p.id));

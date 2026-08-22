@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Minus, Plus, Tag, Trash2 } from "lucide-react";
 import { inr } from "@/lib/mock-data";
@@ -10,19 +10,7 @@ import { FallingFlowers } from "@/components/shop/FallingFlowers";
 import { useShop } from "@/lib/shop-store";
 import { showToast } from "@/lib/toast";
 
-export const Route = createFileRoute("/cart")({
-  head: () => ({
-    meta: [
-      { title: "Your Cart — Nethra's" },
-      { name: "description", content: "Review your mehndi stencils and accessories before checkout." },
-      { property: "og:title", content: "Your Cart — Nethra's" },
-      { property: "og:description", content: "Review your items and proceed to checkout." },
-    ],
-  }),
-  component: CartPage,
-});
-
-function CartPage() {
+export default function CartPage() {
   const { cart, setQty, removeFromCart, subtotal, discount, shipping, total } = useShop();
   const { products } = useCatalog();
   const [couponCode, setCouponCode] = useState("");

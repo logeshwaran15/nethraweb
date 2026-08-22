@@ -1,26 +1,9 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAdmin, type DeliveryZone } from "@/lib/admin-store";
 import { inr } from "@/lib/mock-data";
 import { showToast } from "@/lib/toast";
-
-export const Route = createFileRoute("/admin/delivery")({
-  head: () => ({
-    meta: [
-      { title: "Delivery Charges — Nethra's Admin" },
-      {
-        name: "description",
-        content: "Manage pincode-based delivery charge zones for Nethra's store.",
-      },
-      { property: "og:title", content: "Delivery Charges — Nethra's Admin" },
-      { property: "og:description", content: "Manage delivery charge zones by pincode." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: AdminDelivery,
-});
 
 const emptyZone: DeliveryZone = {
   id: "",
@@ -37,7 +20,7 @@ const inputCls =
   "w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/40";
 const labelCls = "mb-1 block text-xs font-semibold text-muted-foreground";
 
-function AdminDelivery() {
+export default function AdminDelivery() {
   const { deliveryZones, saveDeliveryZone, deleteDeliveryZone } = useAdmin();
   const [editing, setEditing] = useState<{ draft: DeliveryZone; originalId?: string } | null>(null);
   const [saving, setSaving] = useState(false);

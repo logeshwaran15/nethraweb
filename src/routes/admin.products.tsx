@@ -1,24 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAdmin, type AdminProduct } from "@/lib/admin-store";
 import { uploadImage } from "@/lib/api";
 import { showToast } from "@/lib/toast";
 import { inr } from "@/lib/mock-data";
-
-export const Route = createFileRoute("/admin/products")({
-  head: () => ({
-    meta: [
-      { title: "Products — Nethra's Admin" },
-      { name: "description", content: "Add, edit and manage the Nethra's product catalogue." },
-      { property: "og:title", content: "Products — Nethra's Admin" },
-      { property: "og:description", content: "Add, edit and manage the product catalogue." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: AdminProducts,
-});
 
 const emptyProduct: AdminProduct = {
   id: "",
@@ -52,7 +38,7 @@ const useSelection = (ids: string[]) => {
   return { selected, allSelected, toggleAll, toggleOne, clear };
 };
 
-function AdminProducts() {
+export default function AdminProducts() {
   const { products, categories, saveProduct, deleteProduct } = useAdmin();
   const [query, setQuery] = useState("");
   const [group, setGroup] = useState<"all" | "stencils" | "accessories">("all");

@@ -1,21 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Package } from "lucide-react";
 import { inr } from "@/lib/mock-data";
 import { apiGet } from "@/lib/api";
 import { Screen } from "@/components/shop/AppChrome";
-
-export const Route = createFileRoute("/orders")({
-  head: () => ({
-    meta: [
-      { title: "My Orders — Nethra's" },
-      { name: "description", content: "View your Nethra's mehndi stencil and accessory orders." },
-      { property: "og:title", content: "My Orders — Nethra's" },
-      { property: "og:description", content: "Track and review your past Nethra's orders." },
-    ],
-  }),
-  component: OrdersPage,
-});
 
 const tabs = ["All", "Processing", "Shipped", "Delivered", "Cancelled"] as const;
 
@@ -38,7 +26,7 @@ type OrderItemRow = { ProductName: string; ProductImagePath: string | null };
 
 type OrderWithItems = OrderRow & { items: OrderItemRow[] };
 
-function OrdersPage() {
+export default function OrdersPage() {
   const [tab, setTab] = useState<(typeof tabs)[number]>("All");
   const [orders, setOrders] = useState<OrderWithItems[]>([]);
   const [loading, setLoading] = useState(true);
@@ -134,8 +122,7 @@ function OrdersPage() {
 
             <div className="mt-3 flex gap-2">
               <Link
-                to="/track"
-                search={{ order: order.Orderkey }}
+                to={`/track?order=${order.Orderkey}`}
                 className="flex-1 rounded-full gradient-maroon py-2.5 text-center text-xs font-semibold text-primary-foreground"
               >
                 Track Order

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAdmin, type Announcement } from "@/lib/admin-store";
@@ -13,19 +12,6 @@ const useSelection = (ids: string[]) => {
   const clear = () => setSelected([]);
   return { selected, allSelected, toggleAll, toggleOne, clear };
 };
-
-export const Route = createFileRoute("/admin/announcements")({
-  head: () => ({
-    meta: [
-      { title: "Announcements — Nethra's Admin" },
-      { name: "description", content: "Manage the top strip announcement messages for Nethra's store." },
-      { property: "og:title", content: "Announcements — Nethra's Admin" },
-      { property: "og:description", content: "Manage the top strip announcement messages." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: AdminAnnouncements,
-});
 
 const emptyAnnouncement: Announcement = {
   id: "",
@@ -41,7 +27,7 @@ const labelCls = "mb-1 block text-xs font-semibold text-muted-foreground";
 
 const genId = () => `ANN-${Date.now()}`;
 
-function AdminAnnouncements() {
+export default function AdminAnnouncements() {
   const { announcements, saveAnnouncement, deleteAnnouncement } = useAdmin();
   const [editing, setEditing] = useState<{ draft: Announcement; originalId?: string } | null>(null);
 

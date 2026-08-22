@@ -1,23 +1,9 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAdmin, type Banner } from "@/lib/admin-store";
 import { uploadImage } from "@/lib/api";
 import { showToast } from "@/lib/toast";
-
-export const Route = createFileRoute("/admin/banners")({
-  head: () => ({
-    meta: [
-      { title: "Banners — Nethra's Admin" },
-      { name: "description", content: "Manage home and promo banners for Nethra's store." },
-      { property: "og:title", content: "Banners — Nethra's Admin" },
-      { property: "og:description", content: "Manage home and promo banners." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: AdminBanners,
-});
 
 const emptyBanner: Banner = {
   id: "",
@@ -37,7 +23,7 @@ const labelCls = "mb-1 block text-xs font-semibold text-muted-foreground";
 
 const genId = () => `BNR-${Date.now()}`;
 
-function AdminBanners() {
+export default function AdminBanners() {
   const { banners, saveBanner, deleteBanner } = useAdmin();
   const [editing, setEditing] = useState<{ draft: Banner; originalId?: string } | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);

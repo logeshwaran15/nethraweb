@@ -1,26 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAdmin } from "@/lib/admin-store";
 import { inr } from "@/lib/mock-data";
 
-export const Route = createFileRoute("/admin/customers")({
-  head: () => ({
-    meta: [
-      { title: "Customers — Nethra's Admin" },
-      { name: "description", content: "View and manage registered customers for Nethra's store." },
-      { property: "og:title", content: "Customers — Nethra's Admin" },
-      { property: "og:description", content: "View and manage registered customers." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: AdminCustomers,
-});
-
 const PAGE_SIZE = 8;
 
-function AdminCustomers() {
+export default function AdminCustomers() {
   const { customers, setCustomerStatus } = useAdmin();
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);

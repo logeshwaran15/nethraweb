@@ -1,23 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Search, Truck, X } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { apiGet, apiPut } from "@/lib/api";
 import { showToast } from "@/lib/toast";
 import { inr } from "@/lib/mock-data";
-
-export const Route = createFileRoute("/admin/orders")({
-  head: () => ({
-    meta: [
-      { title: "Orders — Nethra's Admin" },
-      { name: "description", content: "View and manage customer orders for Nethra's store." },
-      { property: "og:title", content: "Orders — Nethra's Admin" },
-      { property: "og:description", content: "View and manage customer orders." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: AdminOrders,
-});
 
 const statuses = ["All", "Processing", "Shipped", "Delivered", "Cancelled"] as const;
 type OrderStatus = Exclude<(typeof statuses)[number], "All">;
@@ -53,7 +39,7 @@ type OrderItemRow = {
 
 const PAGE_SIZE = 8;
 
-function AdminOrders() {
+export default function AdminOrders() {
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");

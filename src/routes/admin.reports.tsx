@@ -1,20 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAdmin } from "@/lib/admin-store";
 import { inr, mockOrders } from "@/lib/mock-data";
-
-export const Route = createFileRoute("/admin/reports")({
-  head: () => ({
-    meta: [
-      { title: "Reports — Nethra's Admin" },
-      { name: "description", content: "Sales, category and top product reports for Nethra's store." },
-      { property: "og:title", content: "Reports — Nethra's Admin" },
-      { property: "og:description", content: "Sales, category and top product reports." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: AdminReports,
-});
 
 const monthly = [
   { month: "Jan", value: 12400 },
@@ -25,7 +11,7 @@ const monthly = [
   { month: "Jun", value: 21800 },
 ];
 
-function AdminReports() {
+export default function AdminReports() {
   const { products, categories } = useAdmin();
   const max = Math.max(...monthly.map((m) => m.value));
   const top = [...products].sort((a, b) => b.reviews - a.reviews).slice(0, 5);

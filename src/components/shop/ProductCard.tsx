@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
 import { useRef } from "react";
 import { inr } from "@/lib/mock-data";
@@ -20,7 +20,7 @@ export function ProductCard({ product }: { product: Product }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
       <div className="relative">
-        <Link to="/product/$id" params={{ id: product.id }}>
+        <Link to={`/product/${product.id}`}>
           <img
             ref={imgRef}
             src={product.image}
@@ -41,8 +41,7 @@ export function ProductCard({ product }: { product: Product }) {
       </div>
       <div className="space-y-1.5 p-2.5">
         <Link
-          to="/product/$id"
-          params={{ id: product.id }}
+          to={`/product/${product.id}`}
           className="line-clamp-1 block text-[13px]"
         >
           <span className="font-bold text-foreground">{product.name.split(" ")[0]}</span>{" "}

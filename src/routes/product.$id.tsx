@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useRef, useState } from "react";
 import { Check, Heart, Minus, Plus, Star } from "lucide-react";
 import { inr } from "@/lib/mock-data";
@@ -9,28 +9,10 @@ import { WhatsAppButton } from "@/components/shop/WhatsAppButton";
 import { useShop } from "@/lib/shop-store";
 import { flyToCart } from "@/lib/fly-to-cart";
 
-export const Route = createFileRoute("/product/$id")({
-  head: () => ({
-    meta: [
-      { title: "Product Details — Nethra's" },
-      {
-        name: "description",
-        content: "Premium reusable mehndi stencil and accessory details, pricing and reviews.",
-      },
-      { property: "og:title", content: "Product Details — Nethra's" },
-      {
-        property: "og:description",
-        content: "Premium reusable mehndi stencils and elegant hair accessories.",
-      },
-    ],
-  }),
-  component: ProductPage,
-});
-
 const tabs = ["Description", "How to Use", "Shipping & Returns"] as const;
 
-function ProductPage() {
-  const { id } = Route.useParams();
+export default function ProductPage() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { products } = useCatalog();
   const product = products.find((p) => p.id === id);
@@ -130,7 +112,7 @@ function ProductPage() {
             onClick={() => {
               if (imgRef.current) flyToCart(imgRef.current);
               addToCart(product, qty);
-              navigate({ to: "/cart" });
+              navigate("/cart");
             }}
             className="rounded-full bg-gold py-3 text-sm font-semibold text-primary"
           >

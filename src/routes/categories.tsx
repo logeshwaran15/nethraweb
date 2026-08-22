@@ -1,28 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { useCatalog } from "@/lib/catalog-store";
 import { Screen } from "@/components/shop/AppChrome";
 import { ProductCard } from "@/components/shop/ProductCard";
 
-export const Route = createFileRoute("/categories")({
-  head: () => ({
-    meta: [
-      { title: "Shop Categories — Nethra's Mehndi Stencils" },
-      {
-        name: "description",
-        content:
-          "Browse hand, finger, bridal and arabic mehndi stencils plus hair clips and invisible chains.",
-      },
-      { property: "og:title", content: "Shop Categories — Nethra's" },
-      {
-        property: "og:description",
-        content: "Browse mehndi stencils and hair accessories by category.",
-      },
-    ],
-  }),
-  component: CategoriesPage,
-});
-
-function CategoriesPage() {
+export default function CategoriesPage() {
   const { categories, products } = useCatalog();
   return (
     <Screen title="Shop" showSearch>
@@ -61,8 +42,7 @@ function CategoriesPage() {
 function CategoryTile({ slug, name, image }: { slug: string; name: string; image: string }) {
   return (
     <Link
-      to="/category/$slug"
-      params={{ slug }}
+      to={`/category/${slug}`}
       className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]"
     >
       <img

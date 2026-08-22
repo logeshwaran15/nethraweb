@@ -1,29 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { useCatalog } from "@/lib/catalog-store";
 import { Screen } from "@/components/shop/AppChrome";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { HeroBanner } from "@/components/shop/HeroBanner";
 
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Nethra's — Mehndi Stencils & Hair Accessories" },
-      {
-        name: "description",
-        content:
-          "Shop premium reusable mehndi stencils, hair clips and invisible chains at Nethra's. Easy to apply, neat finish, fast delivery.",
-      },
-      { property: "og:title", content: "Nethra's — Mehndi Stencils & Hair Accessories" },
-      {
-        property: "og:description",
-        content: "Premium mehndi stencils and elegant hair accessories, delivered to your door.",
-      },
-    ],
-  }),
-  component: HomePage,
-});
-
-function HomePage() {
+export default function HomePage() {
   const { products, categories } = useCatalog();
   const bestSellers = products.filter((p) => p.group === "stencils");
   const accessories = products.filter((p) => p.group === "accessories");
@@ -40,8 +21,7 @@ function HomePage() {
           {categories.map((c) => (
             <Link
               key={c.slug}
-              to="/category/$slug"
-              params={{ slug: c.slug }}
+              to={`/category/${c.slug}`}
               className="w-[76px] shrink-0 text-center"
             >
               <img

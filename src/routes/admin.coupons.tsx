@@ -1,21 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAdmin, type Coupon } from "@/lib/admin-store";
-
-export const Route = createFileRoute("/admin/coupons")({
-  head: () => ({
-    meta: [
-      { title: "Coupons — Nethra's Admin" },
-      { name: "description", content: "Create and manage discount coupons for Nethra's store." },
-      { property: "og:title", content: "Coupons — Nethra's Admin" },
-      { property: "og:description", content: "Create and manage discount coupons." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: AdminCoupons,
-});
 
 const emptyCoupon: Coupon = {
   code: "",
@@ -42,7 +28,7 @@ const formatExpiry = (isoDate: string) => {
 
 const PAGE_SIZE = 8;
 
-function AdminCoupons() {
+export default function AdminCoupons() {
   const { coupons, saveCoupon, deleteCoupon } = useAdmin();
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);

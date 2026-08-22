@@ -1,4 +1,4 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   ChevronLeft,
   Grid2x2,
@@ -72,7 +72,7 @@ export function TopBar({
           {back ? (
             <button
               aria-label="Go back"
-              onClick={() => navigate({ to: ".." })}
+              onClick={() => navigate(-1)}
               className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-primary"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -146,7 +146,7 @@ const navItems = [
 ] as const;
 
 export function BottomNav() {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { pathname } = useLocation();
   const { count } = useShop();
 
   return (

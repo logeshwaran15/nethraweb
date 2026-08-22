@@ -1,27 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
 import { AlertTriangle, ChevronLeft, ChevronRight, Minus, Plus, Search } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAdmin } from "@/lib/admin-store";
-
-export const Route = createFileRoute("/admin/inventory")({
-  head: () => ({
-    meta: [
-      { title: "Inventory — Nethra's Admin" },
-      { name: "description", content: "Track and adjust stock levels for Nethra's product catalogue." },
-      { property: "og:title", content: "Inventory — Nethra's Admin" },
-      { property: "og:description", content: "Track and adjust stock levels." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: AdminInventory,
-});
 
 const filters = ["All", "Low Stock", "Out of Stock"] as const;
 const LOW_STOCK_THRESHOLD = 10;
 const PAGE_SIZE = 8;
 
-function AdminInventory() {
+export default function AdminInventory() {
   const { products, saveProduct } = useAdmin();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<(typeof filters)[number]>("All");

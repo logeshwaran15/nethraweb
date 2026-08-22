@@ -1,32 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { useParams } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { useCatalog } from "@/lib/catalog-store";
 import { Screen } from "@/components/shop/AppChrome";
 import { ProductCard } from "@/components/shop/ProductCard";
 
-export const Route = createFileRoute("/category/$slug")({
-  head: () => ({
-    meta: [
-      { title: "Category — Nethra's Mehndi Stencils & Accessories" },
-      {
-        name: "description",
-        content: "Explore this collection of premium mehndi stencils and hair accessories.",
-      },
-      { property: "og:title", content: "Category — Nethra's" },
-      {
-        property: "og:description",
-        content: "Explore premium mehndi stencils and hair accessories by category.",
-      },
-    ],
-  }),
-  component: CategoryPage,
-});
-
 const sortOptions = ["Popularity", "Price: Low to High", "Newest", "Discount"] as const;
 type SortOption = (typeof sortOptions)[number];
 
-function CategoryPage() {
-  const { slug } = Route.useParams();
+export default function CategoryPage() {
+  const { slug } = useParams<{ slug: string }>();
   const { categories, products } = useCatalog();
   const category = categories.find((c) => c.slug === slug);
   const [sort, setSort] = useState<SortOption>("Popularity");

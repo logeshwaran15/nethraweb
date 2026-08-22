@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { useSearchParams } from "react-router-dom";
 import {
   Check,
   CheckCircle2,
@@ -16,23 +16,6 @@ import { trackingSteps } from "@/lib/mock-data";
 import { apiGet } from "@/lib/api";
 import { Screen } from "@/components/shop/AppChrome";
 import { WhatsAppButton } from "@/components/shop/WhatsAppButton";
-
-type SearchParams = { order?: string | undefined };
-
-export const Route = createFileRoute("/track")({
-  validateSearch: (search: Record<string, unknown>): SearchParams => ({
-    order: typeof search["order"] === "string" ? search["order"] : undefined,
-  }),
-  head: () => ({
-    meta: [
-      { title: "Track Order — Nethra's" },
-      { name: "description", content: "Follow your Nethra's order from packing to doorstep delivery." },
-      { property: "og:title", content: "Track Order — Nethra's" },
-      { property: "og:description", content: "Live tracking timeline for your Nethra's order." },
-    ],
-  }),
-  component: TrackPage,
-});
 
 type StepState = "done" | "current" | "pending";
 
@@ -56,8 +39,9 @@ const stepForStatus: Record<OrderRow["Status"], number> = {
   Cancelled: 1,
 };
 
-function TrackPage() {
-  const { order: orderKey } = Route.useSearch();
+export default function TrackPage() {
+  const [searchParams] = useSearchParams();
+  const orderKey = searchParams.get("order") ?? undefined;
   const [order, setOrder] = useState<OrderRow | null>(null);
   const [expanded, setExpanded] = useState<number | null>(1);
 
