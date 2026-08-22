@@ -1,10 +1,17 @@
 <?php
-// This machine's XAMPP MySQL runs on 3307 (see my.ini) instead of the 3306 default.
-$DB_HOST = "127.0.0.1";
-$DB_PORT = "3307";
-$DB_NAME = "nethras_db";
-$DB_USER = "root";
-$DB_PASS = "";
+// Local XAMPP fallback (port 3307, root/no password) is used only when
+// DB_* environment variables aren't set. Production sets these via
+// backend/config/db.local.php (gitignored — never commit real credentials).
+$DB_HOST = getenv("DB_HOST") ?: "127.0.0.1";
+$DB_PORT = getenv("DB_PORT") ?: "3307";
+$DB_NAME = getenv("DB_NAME") ?: "nethras_db";
+$DB_USER = getenv("DB_USER") ?: "root";
+$DB_PASS = getenv("DB_PASS") ?: "";
+
+$localOverride = __DIR__ . "/db.local.php";
+if (file_exists($localOverride)) {
+    require $localOverride;
+}
 
 try {
     $pdo = new PDO(

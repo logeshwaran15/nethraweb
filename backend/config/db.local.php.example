@@ -1,0 +1,8 @@
+<?php
+// Copy this file to db.local.php on the production server and fill in real values.
+// db.local.php is gitignored — it must never be committed.
+$DB_HOST = "localhost";
+$DB_PORT = "3306";
+$DB_NAME = "nethras_db";
+$DB_USER = "nethras_user";
+$DB_PASS = "";
