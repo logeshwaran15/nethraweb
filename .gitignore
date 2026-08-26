@@ -23,6 +23,7 @@ dist-ssr
 # Local env overrides (machine-specific API URL/port)
 .env
 backend/config/db.local.php
+backend/config/razorpay.local.php
 
 # Editor directories and files
 .vscode/*

@@ -6,7 +6,8 @@ require_once __DIR__ . "/../helpers/crud.php";
 $method = $_SERVER['REQUEST_METHOD'];
 $columns = [
     "OrderNumber", "UserKeyRef", "Subtotal", "Discount", "ShippingFee", "Total",
-    "CouponCode", "Status", "PaymentMethod", "CourierName", "TrackingId",
+    "CouponCode", "Status", "PaymentMethod", "RazorpayOrderId", "RazorpayPaymentId",
+    "PaymentStatus", "CourierName", "TrackingId",
     "ShippingName", "ShippingPhone", "ShippingAddress",
 ];
 

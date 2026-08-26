@@ -1,28 +1,27 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Banknote, CreditCard, Landmark, Smartphone, ShieldCheck } from "lucide-react";
+import { CreditCard, Landmark, Smartphone, ShieldCheck } from "lucide-react";
 import { inr } from "@/lib/mock-data";
 import { Screen } from "@/components/shop/AppChrome";
 import { useShop } from "@/lib/shop-store";
 import { showToast } from "@/lib/toast";
+import { payWithRazorpay } from "@/lib/razorpay";
 
 const methods = [
   { id: "upi", icon: Smartphone, name: "UPI", sub: "Google Pay, PhonePe, Paytm" },
   { id: "card", icon: CreditCard, name: "Credit / Debit Card", sub: "Visa, Mastercard, RuPay" },
   { id: "net", icon: Landmark, name: "Net Banking", sub: "All major banks" },
-  { id: "cod", icon: Banknote, name: "Cash on Delivery", sub: "Pay when you receive" },
 ];
 
 const methodLabels: Record<string, string> = {
   upi: "UPI",
   card: "Card",
   net: "Net Banking",
-  cod: "COD",
 };
 
 export default function PaymentPage() {
   const navigate = useNavigate();
-  const { total, subtotal, discount, cart, placeOrder } = useShop();
+  const { total, subtotal, discount, cart, placeOrder, shippingInfo } = useShop();
   const [selected, setSelected] = useState("upi");
   const [coupon, setCoupon] = useState("");
   const [placing, setPlacing] = useState(false);
@@ -31,7 +30,18 @@ export default function PaymentPage() {
     if (cart.length === 0) return;
     setPlacing(true);
     try {
-      const order = await placeOrder(methodLabels[selected] ?? selected);
+      const razorpayPayment = await payWithRazorpay({
+        amount: total,
+        name: shippingInfo.fullName,
+        email: shippingInfo.email,
+        phone: shippingInfo.phone,
+        description: `Order for ${cart.length} item(s)`,
+      });
+
+      const order = await placeOrder(methodLabels[selected] ?? selected, {
+        razorpayOrderId: razorpayPayment.razorpayOrderId,
+        razorpayPaymentId: razorpayPayment.razorpayPaymentId,
+      });
       navigate(`/order-success?order=${order.orderKey}`);
     } catch (err) {
       showToast(err instanceof Error ? err.message : "Failed to place order", "error");
@@ -113,7 +123,7 @@ export default function PaymentPage() {
           {placing ? "Placing order…" : `Pay ${inr(total)}`}
         </button>
         <p className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
-          <ShieldCheck className="h-3.5 w-3.5" /> Demo only · No real payment is processed
+          <ShieldCheck className="h-3.5 w-3.5" /> Payments are secured by Razorpay
         </p>
       </div>
     </Screen>

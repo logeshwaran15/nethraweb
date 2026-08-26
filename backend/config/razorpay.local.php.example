@@ -1,0 +1,6 @@
+<?php
+// Copy this file to razorpay.local.php on the production server and fill in the real secret.
+// razorpay.local.php is gitignored — it must never be committed.
+// The Key ID is public and already stored in the paymentsettings table (set via Admin Settings);
+// only the secret needs to live here, server-side only.
+$RAZORPAY_KEY_SECRET = "";

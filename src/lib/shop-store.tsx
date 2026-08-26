@@ -50,7 +50,10 @@ type ShopState = {
   setShippingInfo: (s: ShippingInfo) => void;
   shippingFee: number;
   setShippingFee: (n: number) => void;
-  placeOrder: (paymentMethod: string) => Promise<PlacedOrder>;
+  placeOrder: (
+    paymentMethod: string,
+    payment?: { razorpayOrderId?: string; razorpayPaymentId?: string },
+  ) => Promise<PlacedOrder>;
   lastOrder: PlacedOrder | null;
 };
 
@@ -106,7 +109,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
         setWishlist((prev) =>
           prev.includes(id) ? prev.filter((w) => w !== id) : [...prev, id],
         ),
-      placeOrder: async (paymentMethod) => {
+      placeOrder: async (paymentMethod, payment) => {
         const orderNumber = `NS${Date.now()}`;
         const order = await apiPost<OrderRow>("/api/orders.php", {
           OrderNumber: orderNumber,
@@ -116,6 +119,9 @@ export function ShopProvider({ children }: { children: ReactNode }) {
           Total: total,
           Status: "Processing",
           PaymentMethod: paymentMethod,
+          RazorpayOrderId: payment?.razorpayOrderId ?? null,
+          RazorpayPaymentId: payment?.razorpayPaymentId ?? null,
+          PaymentStatus: payment?.razorpayPaymentId ? "Paid" : "Pending",
           ShippingName: shippingInfo.fullName,
           ShippingPhone: shippingInfo.phone,
           ShippingAddress: `${shippingInfo.address}${shippingInfo.landmark ? ", " + shippingInfo.landmark : ""}, ${shippingInfo.city}, ${shippingInfo.state} - ${shippingInfo.pincode}`,
