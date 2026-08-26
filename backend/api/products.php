@@ -25,12 +25,12 @@ if ($method === 'POST') {
     $colList = implode(", ", array_map(fn($c) => "`$c`", array_merge(["Productkey"], $columns)));
     $placeholders = implode(", ", array_fill(0, count($columns) + 1, "?"));
 
-    $stmt = $pdo->prepare("INSERT INTO Products ($colList) VALUES ($placeholders)");
+    $stmt = $pdo->prepare("INSERT INTO products ($colList) VALUES ($placeholders)");
     $stmt->execute($values);
 
-    $fetch = $pdo->prepare("SELECT * FROM Products WHERE Productkey = ?");
+    $fetch = $pdo->prepare("SELECT * FROM products WHERE Productkey = ?");
     $fetch->execute([$id]);
     send($fetch->fetch(), 201);
 }
 
-handle_crud($pdo, "Products", "Productkey", $columns, "Name");
+handle_crud($pdo, "products", "Productkey", $columns, "Name");

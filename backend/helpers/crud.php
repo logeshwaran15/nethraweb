@@ -5,7 +5,7 @@ require_once __DIR__ . "/response.php";
  * Generic REST handler for a single table.
  *
  * @param PDO    $pdo
- * @param string $table       Table name, e.g. "Products"
+ * @param string $table       Table name, e.g. "products"
  * @param string $keyColumn   Primary key column, e.g. "Productkey"
  * @param array  $columns     Insertable/updatable columns (excludes the key + audit columns)
  * @param string $orderBy     Default ORDER BY clause

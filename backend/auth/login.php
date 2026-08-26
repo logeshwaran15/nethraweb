@@ -15,7 +15,7 @@ if ($email === '' || $password === '') {
     fail("Email and password are required");
 }
 
-$stmt = $pdo->prepare("SELECT * FROM Users WHERE Email = ? LIMIT 1");
+$stmt = $pdo->prepare("SELECT * FROM users WHERE Email = ? LIMIT 1");
 $stmt->execute([$email]);
 $user = $stmt->fetch();
 
@@ -27,7 +27,7 @@ if ((int)$user['IsActive'] === 0) {
     fail("This account has been blocked", 403);
 }
 
-$update = $pdo->prepare("UPDATE Users SET LastLoginOn = NOW() WHERE Userkey = ?");
+$update = $pdo->prepare("UPDATE users SET LastLoginOn = NOW() WHERE Userkey = ?");
 $update->execute([$user['Userkey']]);
 
 unset($user['Password']);

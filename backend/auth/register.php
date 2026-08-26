@@ -17,7 +17,7 @@ if ($fullName === '' || $email === '' || $password === '') {
     fail("Name, email and password are required");
 }
 
-$existing = $pdo->prepare("SELECT Userkey FROM Users WHERE Email = ? LIMIT 1");
+$existing = $pdo->prepare("SELECT Userkey FROM users WHERE Email = ? LIMIT 1");
 $existing->execute([$email]);
 if ($existing->fetch()) {
     fail("An account with this email already exists", 409);
@@ -25,7 +25,7 @@ if ($existing->fetch()) {
 
 $key = new_key();
 $insert = $pdo->prepare(
-    "INSERT INTO Users (Userkey, FullName, Email, Password, PhoneNumber, Role, IsActive, CreatedBy)
+    "INSERT INTO users (Userkey, FullName, Email, Password, PhoneNumber, Role, IsActive, CreatedBy)
      VALUES (?, ?, ?, ?, ?, 'Customer', 1, ?)"
 );
 $insert->execute([$key, $fullName, $email, $password, $phone, $fullName]);

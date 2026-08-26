@@ -4,9 +4,9 @@ require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../helpers/crud.php";
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && !empty($_GET['userKey'])) {
-    $stmt = $pdo->prepare("SELECT * FROM Wishlist WHERE UserKeyRef = ?");
+    $stmt = $pdo->prepare("SELECT * FROM wishlist WHERE UserKeyRef = ?");
     $stmt->execute([$_GET['userKey']]);
     send($stmt->fetchAll());
 }
 
-handle_crud($pdo, "Wishlist", "Wishlistkey", ["UserKeyRef", "ProductKeyRef"]);
+handle_crud($pdo, "wishlist", "Wishlistkey", ["UserKeyRef", "ProductKeyRef"]);

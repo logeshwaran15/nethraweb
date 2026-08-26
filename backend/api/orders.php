@@ -10,19 +10,19 @@ $columns = [
     "ShippingName", "ShippingPhone", "ShippingAddress",
 ];
 
-// PUT with a Status change also writes an OrderLog row, so the transition is auditable.
+// PUT with a Status change also writes an orderlog row, so the transition is auditable.
 if ($method === 'PUT' && !empty($_GET['key'])) {
     $key = $_GET['key'];
     $body = json_input();
 
     if (array_key_exists('Status', $body)) {
-        $current = $pdo->prepare("SELECT Status FROM Orders WHERE Orderkey = ?");
+        $current = $pdo->prepare("SELECT Status FROM orders WHERE Orderkey = ?");
         $current->execute([$key]);
         $row = $current->fetch();
         if ($row && $row['Status'] !== $body['Status']) {
             $logId = new_key();
             $pdo->prepare(
-                "INSERT INTO OrderLog (OrderLogkey, OrderKeyRef, OldStatus, NewStatus, Remarks, CreatedBy)
+                "INSERT INTO orderlog (OrderLogkey, OrderKeyRef, OldStatus, NewStatus, Remarks, CreatedBy)
                  VALUES (?, ?, ?, ?, ?, ?)"
             )->execute([
                 $logId,
@@ -36,4 +36,4 @@ if ($method === 'PUT' && !empty($_GET['key'])) {
     }
 }
 
-handle_crud($pdo, "Orders", "Orderkey", $columns, "CreatedOn DESC");
+handle_crud($pdo, "orders", "Orderkey", $columns, "CreatedOn DESC");
