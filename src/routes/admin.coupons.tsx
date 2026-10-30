@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchQuery } from "@/components/admin/useSearchQuery";
+import { PageSizeSelect } from "@/components/admin/PageSizeSelect";
+import { DatePicker } from "@/components/admin/DatePickers";
 import { ChevronLeft, ChevronRight, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { Req } from "@/components/admin/Req";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAdmin, type Coupon } from "@/lib/admin-store";
 
@@ -26,12 +30,11 @@ const formatExpiry = (isoDate: string) => {
   return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 };
 
-const PAGE_SIZE = 8;
-
 export default function AdminCoupons() {
   const { coupons, saveCoupon, deleteCoupon } = useAdmin();
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useSearchQuery();
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
   const [editing, setEditing] = useState<{ draft: Coupon; originalCode?: string } | null>(null);
 
   const list = useMemo(
@@ -39,7 +42,7 @@ export default function AdminCoupons() {
     [coupons, query],
   );
 
-  const pageCount = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+  const pageCount = Math.max(1, Math.ceil(list.length / pageSize));
 
   useEffect(() => {
     setPage(1);
@@ -49,13 +52,20 @@ export default function AdminCoupons() {
     if (page > pageCount) setPage(pageCount);
   }, [page, pageCount]);
 
-  const paged = useMemo(() => list.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), [list, page]);
+  useEffect(() => {
+    setPage(1);
+  }, [pageSize]);
 
-  const submit = () => {
+  const paged = useMemo(
+    () => list.slice((page - 1) * pageSize, page * pageSize),
+    [list, page, pageSize],
+  );
+
+  const submit = async () => {
     if (!editing) return;
     const draft = { ...editing.draft, code: editing.draft.code.trim().toUpperCase() };
     if (!draft.code) return;
-    saveCoupon(draft, editing.originalCode);
+    if ((await saveCoupon(draft, editing.originalCode)) === false) return;
     setEditing(null);
   };
 
@@ -82,7 +92,7 @@ export default function AdminCoupons() {
         />
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
+      <div className="mt-4 overflow-hidden rounded-sm border border-border bg-card shadow-[var(--shadow-card)]">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[700px] text-left text-sm">
             <thead className="bg-muted/60 text-[11px] uppercase text-muted-foreground">
@@ -150,9 +160,10 @@ export default function AdminCoupons() {
 
         <div className="flex flex-col items-center justify-between gap-3 border-t border-border px-4 py-3 sm:flex-row">
           <p className="text-xs text-muted-foreground">
-            Showing {list.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–
-            {Math.min(page * PAGE_SIZE, list.length)} of {list.length}
+            Showing {list.length === 0 ? 0 : (page - 1) * pageSize + 1}–
+            {Math.min(page * pageSize, list.length)} of {list.length}
           </p>
+          <PageSizeSelect value={pageSize} onChange={setPageSize} />
           <div className="flex items-center gap-2">
             <button
               aria-label="Previous page"
@@ -180,9 +191,9 @@ export default function AdminCoupons() {
       {editing && (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
           <div className="absolute inset-0 bg-foreground/40" onClick={() => setEditing(null)} />
-          <div className="relative max-h-[90vh] w-full overflow-y-auto rounded-t-3xl bg-card p-5 sm:max-w-lg sm:rounded-3xl">
+          <div className="relative max-h-[90vh] w-full overflow-y-auto rounded-t-sm bg-card p-5 sm:max-w-lg sm:rounded-sm">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-xl text-primary">
+              <h2 className="font-sans text-xl text-primary">
                 {editing.originalCode ? "Edit Coupon" : "Add Coupon"}
               </h2>
               <button aria-label="Close" onClick={() => setEditing(null)}>
@@ -192,7 +203,7 @@ export default function AdminCoupons() {
 
             <div className="space-y-3">
               <label className="block">
-                <span className={labelCls}>Coupon Code</span>
+                <span className={labelCls}>Coupon Code<Req /></span>
                 <input
                   className={`${inputCls} font-mono uppercase`}
                   placeholder="Enter coupon code"
@@ -269,12 +280,10 @@ export default function AdminCoupons() {
               </div>
               <label className="block">
                 <span className={labelCls}>Expiry Date</span>
-                <input
-                  type="date"
-                  className={inputCls}
+                <DatePicker
                   value={editing.draft.expiry}
-                  onChange={(e) =>
-                    setEditing({ ...editing, draft: { ...editing.draft, expiry: e.target.value } })
+                  onChange={(v) =>
+                    setEditing({ ...editing, draft: { ...editing.draft, expiry: v } })
                   }
                 />
               </label>
@@ -283,7 +292,10 @@ export default function AdminCoupons() {
                   type="checkbox"
                   checked={editing.draft.active}
                   onChange={(e) =>
-                    setEditing({ ...editing, draft: { ...editing.draft, active: e.target.checked } })
+                    setEditing({
+                      ...editing,
+                      draft: { ...editing.draft, active: e.target.checked },
+                    })
                   }
                 />
                 Active for customers

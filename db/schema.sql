@@ -1,4 +1,4 @@
--- Nethra's Mehndi Stencils & Hair Accessories
+-- Nethra's Mehandi Stencils & Hair Accessories
 -- Database schema (MySQL)
 -- No foreign key constraints — joins are handled in the PHP backend.
 -- Every *key column is a 32-char id: DEFAULT (REPLACE(UUID(), '-', ''))
@@ -46,6 +46,9 @@ CREATE TABLE Categories
     CategoryGroup   VARCHAR(50)   NOT NULL DEFAULT 'stencils',
     -- stencils / accessories
 
+    SortOrder       INT           NOT NULL DEFAULT 0,
+    -- 1,2,3… = position on the home/shop pages; 0 = no position (listed last, A-Z)
+
     IsActive        TINYINT(1)    NOT NULL DEFAULT 1,
 
     CreatedOn       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -79,7 +82,11 @@ CREATE TABLE Products
     ReviewsCount    INT           NOT NULL DEFAULT 0,
 
     Stock           INT           NOT NULL DEFAULT 0,
-    IsActive        TINYINT(1)    NOT NULL DEFAULT 1,
+
+    Variants        TEXT          NULL,
+    -- JSON: [{"label":"1","price":39,"mrp":49,"stock":10}, ...] — per-option price/stock
+
+    IsActive       TINYINT(1)    NOT NULL DEFAULT 1,
 
     CreatedOn       DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     ModifiedOn      DATETIME      NULL,
@@ -111,6 +118,7 @@ CREATE TABLE Orders
     -- COD / Razorpay / UPI
 
     CourierName     VARCHAR(150)  NULL,
+    CourierBillPath VARCHAR(500)  NULL,
     TrackingId      VARCHAR(150)  NULL,
 
     ShippingName    VARCHAR(150)  NULL,
@@ -210,6 +218,7 @@ CREATE TABLE CartItems
 
     UserKeyRef      CHAR(32)      NOT NULL, -- join to Users.Userkey in PHP
     ProductKeyRef   CHAR(32)      NOT NULL, -- join to Products.Productkey in PHP
+    VariantLabel    VARCHAR(100)  NULL,     -- chosen option (e.g. "7"), NULL for plain products
 
     Qty             INT           NOT NULL DEFAULT 1,
 
@@ -245,6 +254,7 @@ CREATE TABLE PaymentSettings
     RazorpayKeyId       VARCHAR(200)  NULL,
 
     CodEnabled          TINYINT(1)    NOT NULL DEFAULT 1,
+    WhatsappOrderEnabled TINYINT(1)   NOT NULL DEFAULT 0,
     UpiId               VARCHAR(150)  NULL,
 
     FreeShippingAbove   DECIMAL(10,2) NOT NULL DEFAULT 0,

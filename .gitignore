@@ -35,3 +35,12 @@ backend/config/razorpay.local.php
 *.njsproj
 *.sln
 *.sw?
+
+backend/logs/
+backend/config/app.local.php
+backend/config/mail.local.php
+
+/*.zip
+/nethras_production_migration_*.sql
+/banner/
+/backend/uploads/

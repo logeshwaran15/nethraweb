@@ -2,10 +2,12 @@
 require_once __DIR__ . "/../config/cors.php";
 require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../helpers/crud.php";
+require_once __DIR__ . "/../helpers/auth.php";
 
 $method = $_SERVER['REQUEST_METHOD'];
+if ($method !== 'GET') require_admin($pdo); // browsing is public, changing the catalog is not
 $columns = ["Sku", "Name", "Tagline", "Description", "CategoryKeyRef", "ProductGroup",
-    "ImagePath", "Price", "Mrp", "Rating", "ReviewsCount", "Stock", "IsActive"];
+    "ImagePath", "ImagePaths", "Price", "Mrp", "Rating", "ReviewsCount", "Stock", "Variants", "IsActive"];
 
 // Sku is required + unique in the DB but the admin UI doesn't ask for it —
 // auto-generate one from the product name on create, then insert directly.

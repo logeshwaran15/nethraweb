@@ -1,10 +1,14 @@
 <?php
 require_once __DIR__ . "/../config/cors.php";
+require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../helpers/response.php";
+require_once __DIR__ . "/../helpers/auth.php";
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     fail("Method not allowed", 405);
 }
+
+require_admin($pdo); // only the admin panel uploads images (product/banner/category photos)
 
 if (empty($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
     fail("No file uploaded");
@@ -13,6 +17,13 @@ if (empty($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
 $file = $_FILES['file'];
 
 $allowed = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp', 'gif' => 'image/gif'];
+
+// Optional sub-folder. Courier bills (uploaded from the admin Orders page) also allow PDFs.
+$folder = '';
+if (($_POST['folder'] ?? '') === 'courier-bills') {
+    $folder = 'courier-bills';
+    $allowed['pdf'] = 'application/pdf';
+}
 $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 
 if (!array_key_exists($ext, $allowed)) {
@@ -24,7 +35,7 @@ if ($file['size'] > $maxBytes) {
     fail("File is too large (max 5MB)");
 }
 
-$uploadsDir = __DIR__ . "/../uploads";
+$uploadsDir = __DIR__ . "/../uploads" . ($folder ? "/$folder" : "");
 if (!is_dir($uploadsDir)) {
     mkdir($uploadsDir, 0777, true);
 }
@@ -37,4 +48,4 @@ if (!move_uploaded_file($file['tmp_name'], $destination)) {
 }
 
 // Path relative to this backend's own root, so the frontend just prefixes it with VITE_API_BASE_URL.
-send(["path" => "/uploads/" . $filename], 201);
+send(["path" => "/uploads/" . ($folder ? "$folder/" : "") . $filename], 201);

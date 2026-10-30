@@ -25,28 +25,28 @@ INSERT INTO Products
     (Productkey, Sku, Name, Tagline, Description, CategoryKeyRef, ProductGroup, ImagePath, Price, Mrp, Rating, ReviewsCount, Stock, IsActive)
 VALUES
 (REPLACE(UUID(), '-', ''), 'floral-finger-stencil', 'Floral Finger Stencil',
- 'Beautiful floral finger stencil for easy and perfect mehndi in minutes.',
- 'High quality non-toxic material\nSuitable for all skin types\nGives clean and sharp mehndi lines\nReusable with proper care',
+ 'Beautiful floral finger stencil for easy and perfect mehandi in minutes.',
+ 'High quality non-toxic material\nSuitable for all skin types\nGives clean and sharp mehandi lines',
  'finger-stencils', 'stencils', '/uploads/products/floral-finger-stencil.jpg', 49, 79, 4.8, 124, 24, 1),
 
 (REPLACE(UUID(), '-', ''), 'peacock-design-stencil', 'Peacock Design Stencil',
  'Classic peacock motif that works beautifully for festivals and functions.',
- 'Flexible and easy to place\nDetailed peacock cut-out\nReusable premium sheet\nPerfect finish every time',
+ 'Flexible and easy to place\nDetailed peacock cut-out\nPremium sheet\nPerfect finish every time',
  'arabic-stencils', 'stencils', '/uploads/products/peacock-design-stencil.jpg', 59, 99, 4.7, 96, 8, 1),
 
 (REPLACE(UUID(), '-', ''), 'mandala-hand-stencil', 'Mandala Hand Stencil',
- 'Full-hand mandala design for a rich, traditional mehndi look.',
+ 'Full-hand mandala design for a rich, traditional mehandi look.',
  'Covers the full back of the hand\nSoft flexible material\nEasy to apply and remove\nBridal-quality detailing',
  'hand-stencils', 'stencils', '/uploads/products/mandala-hand-stencil.jpg', 69, 119, 4.9, 212, 42, 1),
 
 (REPLACE(UUID(), '-', ''), 'bridal-design-stencil', 'Bridal Design Stencil',
  'Intricate bridal set designed for weddings and engagement functions.',
- 'Intricate bridal motifs\nSet of matching patterns\nPremium quality material\nReusable and long lasting',
+ 'Intricate bridal motifs\nSet of matching patterns\nPremium quality material\nLong lasting',
  'bridal-stencils', 'stencils', '/uploads/products/bridal-design-stencil.jpg', 79, 129, 4.9, 178, 0, 1),
 
 (REPLACE(UUID(), '-', ''), 'arabic-stencil', 'Arabic Stencil',
- 'Flowing Arabic patterns for a modern, elegant mehndi style.',
- 'Bold flowing patterns\nQuick to apply\nNeat, professional finish\nReusable design',
+ 'Flowing Arabic patterns for a modern, elegant mehandi style.',
+ 'Bold flowing patterns\nQuick to apply\nNeat, professional finish',
  'arabic-stencils', 'stencils', '/uploads/products/arabic-stencil.jpg', 89, 149, 4.6, 88, 15, 1),
 
 (REPLACE(UUID(), '-', ''), 'pearl-hair-clip', 'Pearl Hair Clip',

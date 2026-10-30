@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
+import { Req } from "@/components/admin/Req";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { confirmAction } from "@/lib/confirm";
+import { showToast } from "@/lib/toast";
 import { useAdmin, type Announcement } from "@/lib/admin-store";
 
 const useSelection = (ids: string[]) => {
@@ -34,16 +37,22 @@ export default function AdminAnnouncements() {
   const sorted = [...announcements].sort((a, b) => a.sortOrder - b.sortOrder);
   const { selected, allSelected, toggleAll, toggleOne, clear } = useSelection(sorted.map((a) => a.id));
 
-  const submit = () => {
+  const submit = async () => {
     if (!editing || !editing.draft.message.trim()) return;
     const draft = { ...editing.draft };
     if (!draft.id) draft.id = genId();
-    saveAnnouncement(draft, editing.originalId);
+    if ((await saveAnnouncement(draft, editing.originalId)) === false) return;
     setEditing(null);
   };
 
   const deleteSelected = async () => {
-    await Promise.all(selected.map((id) => deleteAnnouncement(id)));
+    if (!(await confirmAction({ title: "Delete announcements?", message: `Delete ${selected.length} selected announcement(s)? This cannot be undone.`, confirmText: "Delete", variant: "danger" }))) return;
+    try {
+      await Promise.all(selected.map((id) => deleteAnnouncement(id, { silent: true })));
+      showToast(`${selected.length} announcement(s) deleted successfully`, "success");
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Failed to delete announcements", "error");
+    }
     clear();
   };
 
@@ -61,7 +70,7 @@ export default function AdminAnnouncements() {
       }
     >
       {sorted.length > 0 && (
-        <div className="mb-3 flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-2.5">
+        <div className="mb-3 flex items-center justify-between rounded-sm border border-border bg-card px-4 py-2.5">
           <label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
             <input type="checkbox" checked={allSelected} onChange={toggleAll} />
             {selected.length > 0 ? `${selected.length} selected` : "Select all"}
@@ -81,7 +90,7 @@ export default function AdminAnnouncements() {
         {sorted.map((a) => (
           <div
             key={a.id}
-            className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-3 rounded-sm border border-border bg-card p-4 shadow-[var(--shadow-card)] sm:flex-row sm:items-center sm:justify-between"
           >
             <div className="flex min-w-0 flex-1 items-start gap-3">
               <input
@@ -133,9 +142,9 @@ export default function AdminAnnouncements() {
       {editing && (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
           <div className="absolute inset-0 bg-foreground/40" onClick={() => setEditing(null)} />
-          <div className="relative w-full rounded-t-3xl bg-card p-5 sm:max-w-md sm:rounded-3xl">
+          <div className="relative w-full rounded-t-sm bg-card p-5 sm:max-w-md sm:rounded-sm">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-xl text-primary">
+              <h2 className="font-sans text-xl text-primary">
                 {editing.originalId ? "Edit Announcement" : "Add Announcement"}
               </h2>
               <button aria-label="Close" onClick={() => setEditing(null)}>
@@ -145,7 +154,7 @@ export default function AdminAnnouncements() {
 
             <div className="space-y-3">
               <label className="block">
-                <span className={labelCls}>Message</span>
+                <span className={labelCls}>Message<Req /></span>
                 <textarea
                   rows={2}
                   className={inputCls}
@@ -172,6 +181,7 @@ export default function AdminAnnouncements() {
                 <input
                   type="number"
                   className={inputCls}
+                  placeholder="Enter sort order"
                   value={editing.draft.sortOrder}
                   onChange={(e) =>
                     setEditing({

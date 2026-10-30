@@ -1,109 +1,122 @@
 import { Link } from "react-router-dom";
+import { PackageSearch } from "lucide-react";
 import { useCatalog } from "@/lib/catalog-store";
 import { Screen } from "@/components/shop/AppChrome";
 import { ProductCard } from "@/components/shop/ProductCard";
+import { CategoryTile, CATEGORY_GRID } from "@/components/shop/CategoryTile";
 import { HeroBanner } from "@/components/shop/HeroBanner";
+import { SectionHeading } from "@/components/shop/SectionHeading";
+import { EmptyState, ErrorState } from "@/components/shop/EmptyState";
+import { ProductGridSkeleton, CategoryChipsSkeleton } from "@/components/shop/ProductGridSkeleton";
+import { Reveal } from "@/components/shop/Reveal";
+import { WelcomeOfferPopup } from "@/components/shop/WelcomeOfferPopup";
+import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
-  const { products, categories } = useCatalog();
+  const { products, categories, loading, error, reload } = useCatalog();
   const bestSellers = products.filter((p) => p.group === "stencils");
   const accessories = products.filter((p) => p.group === "accessories");
 
   return (
     <Screen showSearch>
-      <section className="gradient-blush px-4 pb-6 pt-4">
+      <section className="gradient-blush px-2 pb-3 pt-2 md:relative md:left-1/2 md:w-screen md:-translate-x-1/2 md:px-6 md:pb-4 md:pt-3">
         <HeroBanner />
       </section>
 
-      <section className="px-4 pt-5">
-        <SectionHead title="Shop by Category" to="/categories" />
-        <div className="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-1">
-          {categories.map((c) => (
-            <Link
-              key={c.slug}
-              to={`/category/${c.slug}`}
-              className="w-[76px] shrink-0 text-center"
-            >
-              <img
-                src={c.image}
-                alt={c.name}
-                loading="lazy"
-                width={800}
-                height={800}
-                className="h-[76px] w-[76px] rounded-full border-2 border-gold-soft object-cover"
+      {error ? (
+        <ErrorState description="Couldn't load the shop right now." onRetry={reload} />
+      ) : (
+        <>
+          <section className="px-4 pt-6 md:px-8 md:pt-10">
+            <SectionHeading title="Shop by Category" to="/categories" />
+            {loading ? (
+              <CategoryChipsSkeleton />
+            ) : categories.length === 0 ? (
+              <p className="text-body-lg text-muted-foreground">No categories yet.</p>
+            ) : (
+              <div className={CATEGORY_GRID}>
+                {categories.map((c, i) => (
+                  <Reveal key={c.slug} index={i}>
+                    <CategoryTile slug={c.slug} name={c.name} image={c.image} />
+                  </Reveal>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="mt-8 px-4 md:px-8">
+            <SectionHeading title="Best Sellers" to="/categories" />
+            {loading ? (
+              <ProductGridSkeleton count={4} />
+            ) : bestSellers.length === 0 ? (
+              <EmptyState
+                icon={PackageSearch}
+                title="No stencils yet"
+                description="Check back soon for new designs."
               />
-              <p className="mt-1.5 text-[11px] font-medium leading-tight">{c.name}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 md:gap-6">
+                {bestSellers.slice(0, 4).map((p, i) => (
+                  <Reveal key={p.id} index={i}>
+                    <ProductCard product={p} />
+                  </Reveal>
+                ))}
+              </div>
+            )}
+          </section>
 
-      <section className="mt-6 grid grid-cols-2 gap-3 px-4">
-        <Link to="/categories" className="rounded-2xl gradient-blush p-4">
-          <p className="font-display text-lg font-semibold text-primary">Combo Offers</p>
-          <p className="mt-1 text-[11px] text-muted-foreground">Best deals on stencils</p>
-          <span className="mt-2 inline-block text-[11px] font-semibold text-maroon-soft">
-            Shop combos →
-          </span>
-        </Link>
-        <Link to="/categories" className="rounded-2xl border border-gold-soft bg-card p-4">
-          <p className="font-display text-lg font-semibold text-primary">New Arrivals</p>
-          <p className="mt-1 text-[11px] text-muted-foreground">Fresh designs weekly</p>
-          <span className="mt-2 inline-block text-[11px] font-semibold text-maroon-soft">
-            Explore now →
-          </span>
-        </Link>
-      </section>
+          <section className="mt-8 px-4 md:px-8">
+            <SectionHeading title="Accessories" to="/categories" />
+            {loading ? (
+              <ProductGridSkeleton count={4} />
+            ) : accessories.length === 0 ? (
+              <EmptyState
+                icon={PackageSearch}
+                title="No accessories yet"
+                description="Check back soon for new arrivals."
+              />
+            ) : (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 md:gap-6">
+                {accessories.map((p, i) => (
+                  <Reveal key={p.id} index={i}>
+                    <ProductCard product={p} />
+                  </Reveal>
+                ))}
+              </div>
+            )}
+          </section>
+        </>
+      )}
 
-      <section className="mt-7 px-4">
-        <SectionHead title="Best Sellers" to="/categories" />
-        <div className="grid grid-cols-2 gap-3">
-          {bestSellers.slice(0, 4).map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
-      </section>
-
-      <section className="mt-7 px-4">
-        <SectionHead title="Accessories" to="/categories" />
-        <div className="grid grid-cols-2 gap-3">
-          {accessories.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
-      </section>
-
-      <section className="mt-8 px-4">
-        <div className="rounded-3xl gradient-maroon p-5 text-primary-foreground">
-          <h3 className="font-display text-2xl font-semibold">Join our mehndi family</h3>
-          <p className="mt-1 text-xs text-primary-foreground/80">
-            Get exclusive offers, new arrivals &amp; mehndi tips.
-          </p>
-          <div className="mt-3 flex gap-2">
-            <input
-              placeholder="Enter your email"
-              className="min-w-0 flex-1 rounded-full bg-card px-4 py-2.5 text-sm text-foreground outline-none"
-            />
-            <button className="shrink-0 rounded-full bg-gold px-4 py-2.5 text-xs font-bold text-primary">
-              Subscribe
-            </button>
+      <section className="mt-10 px-4 md:px-8">
+        <div className="rounded-3xl gradient-maroon p-5 text-primary-foreground md:flex md:items-center md:justify-between md:p-10">
+          <div>
+            <h3 className="text-h2 text-primary-foreground">Join our mehandi family</h3>
+            <p className="text-caption mt-1 text-primary-foreground/80">
+              Get exclusive offers, new arrivals &amp; mehandi tips.
+            </p>
           </div>
+          <form
+            onSubmit={(e) => e.preventDefault()}
+            className="mt-3 flex gap-2 md:mt-0 md:w-[380px] md:shrink-0"
+          >
+            <input
+              type="email"
+              required
+              aria-label="Email address"
+              placeholder="Enter your email"
+              className="min-w-0 flex-1 rounded-xl bg-card px-4 py-2.5 text-sm text-foreground outline-none"
+            />
+            <Button type="submit" variant="gold" size="sm" className="shrink-0">
+              Subscribe
+            </Button>
+          </form>
         </div>
-        <p className="py-6 text-center text-[11px] text-muted-foreground">
+        <p className="text-caption py-6 text-center text-muted-foreground md:hidden">
           © 2026 Nethra's. All rights reserved.
         </p>
       </section>
+      <WelcomeOfferPopup />
     </Screen>
-  );
-}
-
-function SectionHead({ title, to }: { title: string; to: "/categories" }) {
-  return (
-    <div className="mb-3 flex items-end justify-between">
-      <h3 className="font-display text-[22px] font-semibold text-primary">{title}</h3>
-      <Link to={to} className="text-[11px] font-semibold text-maroon-soft">
-        View all →
-      </Link>
-    </div>
   );
 }

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
+import { Req } from "@/components/admin/Req";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { Switch } from "@/components/ui/switch";
 import { useAdmin, type Banner } from "@/lib/admin-store";
 import { uploadImage } from "@/lib/api";
 import { showToast } from "@/lib/toast";
@@ -31,12 +33,25 @@ export default function AdminBanners() {
 
   const sorted = [...banners].sort((a, b) => a.sortOrder - b.sortOrder);
 
-  const submit = () => {
+  const submit = async () => {
     if (!editing || !editing.draft.title.trim()) return;
     const draft = { ...editing.draft };
     if (!draft.id) draft.id = genId();
-    saveBanner(draft, editing.originalId);
+    if ((await saveBanner(draft, editing.originalId)) === false) return;
     setEditing(null);
+  };
+
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  const toggleActive = async (b: Banner) => {
+    setTogglingId(b.id);
+    try {
+      await saveBanner({ ...b, active: !b.active }, b.id, { silent: true });
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Failed to update banner", "error");
+    } finally {
+      setTogglingId(null);
+    }
   };
 
   const pickImage = async (file: File | undefined) => {
@@ -69,67 +84,98 @@ export default function AdminBanners() {
         </button>
       }
     >
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {sorted.map((b) => (
-          <div
-            key={b.id}
-            className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]"
-          >
-            {b.imagePath && b.imagePath !== "pending-upload" ? (
-              <img src={b.imagePath} alt={b.title || "Banner"} className="h-32 w-full object-cover" />
-            ) : (
-              <div className="grid h-32 place-items-center bg-muted text-[10px] text-muted-foreground">
-                No image uploaded
-              </div>
-            )}
-            <div className="p-3">
-              <p className="truncate text-sm font-bold">{b.title || "Untitled banner"}</p>
-              <p className="truncate text-[11px] text-muted-foreground">{b.subtitle}</p>
-              <div className="mt-2 flex items-center justify-between">
-                <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold capitalize text-accent-foreground">
-                  {b.placement}
-                </span>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                    b.active ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {b.active ? "Active" : "Hidden"}
-                </span>
-              </div>
-              <div className="mt-3 flex gap-2">
-                <button
-                  onClick={() => {
-                    setImagePreview(null);
-                    setEditing({ draft: { ...b }, originalId: b.id });
-                  }}
-                  className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-border py-1.5 text-xs font-semibold text-primary hover:bg-accent"
-                >
-                  <Pencil className="h-3.5 w-3.5" /> Edit
-                </button>
-                <button
-                  onClick={() => deleteBanner(b.id)}
-                  className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-border py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="h-3.5 w-3.5" /> Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-        {banners.length === 0 && (
-          <p className="col-span-full py-10 text-center text-sm text-muted-foreground">
-            No banners yet. Add one to get started.
-          </p>
-        )}
+      <div className="overflow-hidden rounded-sm border border-border bg-card shadow-[var(--shadow-card)]">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px] text-left text-sm">
+            <thead className="bg-muted/60 text-[11px] uppercase text-muted-foreground">
+              <tr>
+                <th className="px-4 py-3">Banner</th>
+                <th className="px-4 py-3">Placement</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sorted.map((b) => (
+                <tr key={b.id} className="border-t border-border align-middle">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      {b.imagePath && b.imagePath !== "pending-upload" ? (
+                        <img
+                          src={b.imagePath}
+                          alt={b.title || "Banner"}
+                          className="h-10 w-14 shrink-0 rounded-lg object-cover"
+                        />
+                      ) : (
+                        <span className="grid h-10 w-14 shrink-0 place-items-center rounded-lg bg-muted text-[9px] text-muted-foreground">
+                          No image
+                        </span>
+                      )}
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold">{b.title || "Untitled banner"}</p>
+                        <p className="truncate text-[11px] text-muted-foreground">{b.subtitle}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 capitalize text-muted-foreground">{b.placement}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={b.active}
+                        disabled={togglingId === b.id}
+                        onCheckedChange={() => toggleActive(b)}
+                        aria-label={`${b.active ? "Hide" : "Show"} ${b.title || "banner"}`}
+                      />
+                      <span
+                        className={`text-[11px] font-semibold ${
+                          b.active ? "text-success" : "text-muted-foreground"
+                        }`}
+                      >
+                        {b.active ? "Active" : "Hidden"}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex justify-end gap-2">
+                      <button
+                        aria-label={`Edit ${b.title || "banner"}`}
+                        onClick={() => {
+                          setImagePreview(null);
+                          setEditing({ draft: { ...b }, originalId: b.id });
+                        }}
+                        className="grid h-8 w-8 place-items-center rounded-lg border border-border text-primary hover:bg-accent"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        aria-label={`Delete ${b.title || "banner"}`}
+                        onClick={() => deleteBanner(b.id)}
+                        className="grid h-8 w-8 place-items-center rounded-lg border border-border text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {banners.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                    No banners yet. Add one to get started.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {editing && (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
           <div className="absolute inset-0 bg-foreground/40" onClick={() => setEditing(null)} />
-          <div className="relative max-h-[90vh] w-full overflow-y-auto rounded-t-3xl bg-card p-5 sm:max-w-lg sm:rounded-3xl">
+          <div className="relative max-h-[90vh] w-full overflow-y-auto rounded-t-sm bg-card p-5 sm:max-w-lg sm:rounded-sm">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-xl text-primary">
+              <h2 className="font-sans text-xl text-primary">
                 {editing.originalId ? "Edit Banner" : "Add Banner"}
               </h2>
               <button aria-label="Close" onClick={() => setEditing(null)}>
@@ -139,7 +185,7 @@ export default function AdminBanners() {
 
             <div className="space-y-3">
               <label className="block">
-                <span className={labelCls}>Title</span>
+                <span className={labelCls}>Title<Req /></span>
                 <input
                   className={inputCls}
                   placeholder="Enter banner title"
@@ -156,14 +202,17 @@ export default function AdminBanners() {
                   placeholder="Enter banner subtitle"
                   value={editing.draft.subtitle}
                   onChange={(e) =>
-                    setEditing({ ...editing, draft: { ...editing.draft, subtitle: e.target.value } })
+                    setEditing({
+                      ...editing,
+                      draft: { ...editing.draft, subtitle: e.target.value },
+                    })
                   }
                 />
               </label>
               <label className="block">
                 <span className={labelCls}>Banner Image</span>
                 <p className="mb-1.5 text-[11px] text-muted-foreground">
-                  Recommended size: 1200 × 900px (4:3 ratio), JPG/PNG/WEBP, under 5MB
+                  Recommended size: 1800 × 600px (3:1 ratio, same on laptop and mobile), JPG/PNG/WEBP. Keep text and logo in the centre. Under 300KB is best
                 </p>
                 <input
                   type="file"
@@ -188,7 +237,10 @@ export default function AdminBanners() {
                     placeholder="/categories"
                     value={editing.draft.linkUrl}
                     onChange={(e) =>
-                      setEditing({ ...editing, draft: { ...editing.draft, linkUrl: e.target.value } })
+                      setEditing({
+                        ...editing,
+                        draft: { ...editing.draft, linkUrl: e.target.value },
+                      })
                     }
                   />
                 </label>
@@ -216,7 +268,10 @@ export default function AdminBanners() {
                     onChange={(e) =>
                       setEditing({
                         ...editing,
-                        draft: { ...editing.draft, placement: e.target.value as Banner["placement"] },
+                        draft: {
+                          ...editing.draft,
+                          placement: e.target.value as Banner["placement"],
+                        },
                       })
                     }
                   >
@@ -230,6 +285,7 @@ export default function AdminBanners() {
                   <input
                     type="number"
                     className={inputCls}
+                    placeholder="Enter sort order"
                     value={editing.draft.sortOrder}
                     onChange={(e) =>
                       setEditing({
@@ -245,7 +301,10 @@ export default function AdminBanners() {
                   type="checkbox"
                   checked={editing.draft.active}
                   onChange={(e) =>
-                    setEditing({ ...editing, draft: { ...editing.draft, active: e.target.checked } })
+                    setEditing({
+                      ...editing,
+                      draft: { ...editing.draft, active: e.target.checked },
+                    })
                   }
                 />
                 Active on storefront

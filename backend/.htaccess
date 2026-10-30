@@ -1,0 +1,6 @@
+# Apache strips the Authorization header from PHP by default (both under mod_php
+# and CGI/FastCGI on shared hosts like GoDaddy) — this forwards it through so
+# helpers/auth.php can read the Bearer token.
+RewriteEngine On
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%1]

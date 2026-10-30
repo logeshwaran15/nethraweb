@@ -2,9 +2,11 @@
 require_once __DIR__ . "/../config/cors.php";
 require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../helpers/response.php";
+require_once __DIR__ . "/../helpers/auth.php";
 
 $method = $_SERVER['REQUEST_METHOD'];
-$columns = ["RazorpayEnabled", "RazorpayKeyId", "CodEnabled", "UpiId", "FreeShippingAbove", "FlatShippingFee"];
+if ($method === 'PUT') require_admin($pdo);
+$columns = ["RazorpayEnabled", "RazorpayKeyId", "CodEnabled", "WhatsappOrderEnabled", "UpiId", "FreeShippingAbove", "FlatShippingFee"];
 
 $row = $pdo->query("SELECT * FROM paymentsettings LIMIT 1")->fetch();
 

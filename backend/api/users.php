@@ -2,6 +2,9 @@
 require_once __DIR__ . "/../config/cors.php";
 require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../helpers/response.php";
+require_once __DIR__ . "/../helpers/auth.php";
+
+require_admin($pdo); // customer/user management is admin-only, no public read here
 
 $method = $_SERVER['REQUEST_METHOD'];
 $key = $_GET['key'] ?? null;

@@ -16,12 +16,21 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        // Storefront brand variants — solid maroon (no gradient) per design-system rules.
+        brand:
+          "rounded-xl bg-primary text-primary-foreground shadow-[var(--shadow-card)] hover:bg-primary/90",
+        brandOutline:
+          "rounded-xl border border-primary text-primary hover:bg-primary hover:text-primary-foreground",
+        gold: "rounded-xl bg-gold text-primary hover:bg-gold/85",
       },
       size: {
         default: "h-9 px-4 py-2",
         sm: "h-8 rounded-md px-3 text-xs",
         lg: "h-10 rounded-md px-8",
         icon: "h-9 w-9",
+        // Storefront CTA sizes — comfortable touch targets (44px+).
+        cta: "h-12 px-6 text-sm",
+        ctaLg: "h-[52px] px-8 text-base",
       },
     },
     defaultVariants: {

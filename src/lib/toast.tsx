@@ -27,9 +27,9 @@ const icons: Record<ToastType, typeof CheckCircle2> = {
 };
 
 const styles: Record<ToastType, string> = {
-  success: "border-success/30 bg-success/10 text-success",
-  error: "border-destructive/30 bg-destructive/10 text-destructive",
-  info: "border-border bg-card text-foreground",
+  success: "border-[#2E9B61] bg-white text-[#1E7A4A]",
+  error: "border-[#D92D20] bg-white text-[#B42318]",
+  info: "border-[#E9DADA] bg-white text-[#2D2525]",
 };
 
 export function ToastHost() {
@@ -51,7 +51,7 @@ export function ToastHost() {
         return (
           <div
             key={t.id}
-            className={`animate-in fade-in slide-in-from-top-2 pointer-events-auto flex w-full max-w-sm items-center gap-2 rounded-2xl border px-4 py-3 text-sm font-medium shadow-[var(--shadow-soft)] backdrop-blur ${styles[t.type]}`}
+            className={`animate-in fade-in slide-in-from-top-2 pointer-events-auto flex w-full max-w-sm items-center gap-2 rounded-xl border-l-4 border px-4 py-3 text-sm font-semibold shadow-[0_6px_20px_rgba(45,37,37,0.18)]  ${styles[t.type]}`}
           >
             <Icon className="h-4 w-4 shrink-0" />
             <span className="min-w-0 flex-1">{t.message}</span>

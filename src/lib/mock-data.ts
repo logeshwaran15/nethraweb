@@ -53,49 +53,4 @@ export const mockOrders: MockOrder[] = [
   },
 ];
 
-export const trackingSteps = [
-  {
-    label: "Order Placed",
-    date: "20 May, 2026",
-    time: "10:30 AM",
-    eta: "Completed in 45 min",
-    location: "Coimbatore, TN",
-    note: "We received your order and sent a confirmation to your WhatsApp number.",
-  },
-  {
-    label: "Order Confirmed",
-    date: "20 May, 2026",
-    time: "11:15 AM",
-    eta: "Packed same day",
-    location: "Nethra's Studio, Peelamedu",
-    note: "Items quality-checked, wrapped in tissue and packed in our signature blush box.",
-  },
-  {
-    label: "Shipped",
-    date: "21 May, 2026",
-    time: "09:40 AM",
-    eta: "1 day in transit",
-    location: "Coimbatore Hub",
-    note: "Handed over to our courier partner. Tracking ID: NSX-88213-IN.",
-  },
-  {
-    label: "Out for Delivery",
-    date: "22 May, 2026",
-    time: "08:20 AM",
-    eta: "Arriving by 7:00 PM",
-    location: "Gandhi Street, Peelamedu",
-    note: "Rider Suresh (+91 90000 12345) is carrying your parcel. Keep your phone reachable.",
-  },
-  {
-    label: "Delivered",
-    date: "Expected 22 May",
-    time: "By 7:00 PM",
-    eta: "Awaiting delivery",
-    location: "Your doorstep",
-    note: "OTP will be requested at delivery. Unboxing video recommended for damage claims.",
-  },
-];
-
-
-export const WHATSAPP_NUMBER = "919629427705";
 export const inr = (n: number) => `₹${n.toLocaleString("en-IN")}`;

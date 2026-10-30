@@ -2,9 +2,11 @@
 require_once __DIR__ . "/../config/cors.php";
 require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../helpers/response.php";
+require_once __DIR__ . "/../helpers/auth.php";
 
 // Single-row settings table: GET returns (or creates) the one row, PUT updates it.
 $method = $_SERVER['REQUEST_METHOD'];
+if ($method === 'PUT') require_admin($pdo);
 $columns = ["SiteTitle", "MetaDescription", "MetaKeywords", "OgImagePath", "CanonicalUrl"];
 
 $row = $pdo->query("SELECT * FROM seosettings LIMIT 1")->fetch();

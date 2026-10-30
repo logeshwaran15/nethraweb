@@ -1,4 +1,4 @@
-import { apiDelete, apiGet, apiPost } from "./api";
+import { apiDelete, apiGet, apiPost, apiPut } from "./api";
 
 export type Address = {
   id: string;
@@ -44,12 +44,24 @@ export async function fetchAddresses(userKey: string): Promise<Address[]> {
   return rows.map(fromRow);
 }
 
-export async function saveAddress(
-  userKey: string,
-  address: Omit<Address, "id">,
-): Promise<Address> {
+export async function saveAddress(userKey: string, address: Omit<Address, "id">): Promise<Address> {
   const row = await apiPost<AddressRow>("/api/addresses.php", {
     UserKeyRef: userKey,
+    Label: address.label,
+    FullName: address.fullName,
+    Phone: address.phone,
+    AddressLine: address.addressLine,
+    Landmark: address.landmark,
+    City: address.city,
+    State: address.state,
+    Pincode: address.pincode,
+    IsDefault: address.isDefault ? 1 : 0,
+  });
+  return fromRow(row);
+}
+
+export async function updateAddress(id: string, address: Omit<Address, "id">): Promise<Address> {
+  const row = await apiPut<AddressRow>(`/api/addresses.php?key=${id}`, {
     Label: address.label,
     FullName: address.fullName,
     Phone: address.phone,

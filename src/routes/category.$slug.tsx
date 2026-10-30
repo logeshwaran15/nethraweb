@@ -3,13 +3,15 @@ import { useMemo, useState } from "react";
 import { useCatalog } from "@/lib/catalog-store";
 import { Screen } from "@/components/shop/AppChrome";
 import { ProductCard } from "@/components/shop/ProductCard";
+import { ProductGridSkeleton } from "@/components/shop/ProductGridSkeleton";
+import { Reveal } from "@/components/shop/Reveal";
 
 const sortOptions = ["Popularity", "Price: Low to High", "Newest", "Discount"] as const;
 type SortOption = (typeof sortOptions)[number];
 
 export default function CategoryPage() {
   const { slug } = useParams<{ slug: string }>();
-  const { categories, products } = useCatalog();
+  const { categories, products, loading } = useCatalog();
   const category = categories.find((c) => c.slug === slug);
   const [sort, setSort] = useState<SortOption>("Popularity");
 
@@ -28,9 +30,7 @@ export default function CategoryPage() {
         sorted.reverse();
         break;
       case "Discount":
-        sorted.sort(
-          (a, b) => (b.mrp - b.price) / b.mrp - (a.mrp - a.price) / a.mrp,
-        );
+        sorted.sort((a, b) => (b.mrp - b.price) / b.mrp - (a.mrp - a.price) / a.mrp);
         break;
     }
     return sorted;
@@ -63,11 +63,19 @@ export default function CategoryPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-3 p-4">
-        {list.map((p) => (
-          <ProductCard key={p.id} product={p} />
-        ))}
-      </div>
+      {loading ? (
+        <div className="p-4">
+          <ProductGridSkeleton />
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {list.map((p, i) => (
+            <Reveal key={p.id} index={i}>
+              <ProductCard product={p} />
+            </Reveal>
+          ))}
+        </div>
+      )}
     </Screen>
   );
 }

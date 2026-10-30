@@ -1,13 +1,21 @@
-import { Routes, Route, Outlet, Link } from "react-router-dom";
+import { Routes, Route, Outlet, Link, Navigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { ShopProvider } from "@/lib/shop-store";
 import { CatalogProvider } from "@/lib/catalog-store";
-import { AuthProvider } from "@/lib/auth-store";
+import { AuthProvider, useAuth } from "@/lib/auth-store";
 import { AdminProvider } from "@/lib/admin-store";
 import { ToastHost } from "@/lib/toast";
+import { ConfirmHost } from "@/lib/confirm";
+import { SeoHead } from "@/components/shop/SeoHead";
 
 import IndexPage from "./routes/index";
+import AboutPage from "./routes/about";
+import TermsPage from "./routes/terms";
+import ContactPage from "./routes/contact";
 import AccountPage from "./routes/account";
 import CartPage from "./routes/cart";
+import ForgotPasswordPage from "./routes/forgot-password";
+import ResetPasswordPage from "./routes/reset-password";
 import CategoriesPage from "./routes/categories";
 import CategoryPage from "./routes/category.$slug";
 import CheckoutPage from "./routes/checkout";
@@ -53,7 +61,27 @@ function NotFoundPage() {
   );
 }
 
+// Router doesn't reset scroll position between page navigations on its own —
+// without this, clicking into a product from a scrolled-down list (e.g. search
+// results) lands on the new page already scrolled partway down.
+function ScrollToTop() {
+  // location.key changes on every navigation, including clicking a link to the page you're already on.
+  const { key } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [key]);
+
+  return null;
+}
+
 function AdminLayoutRoute() {
+  const { user } = useAuth();
+
+  if (!user || user.Role !== "Admin") {
+    return <Navigate to="/account" replace />;
+  }
+
   return (
     <AdminProvider>
       <Outlet />
@@ -66,10 +94,17 @@ export default function App() {
     <AuthProvider>
       <CatalogProvider>
         <ShopProvider>
+          <ScrollToTop />
+          <SeoHead />
           <Routes>
             <Route path="/" element={<IndexPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/contact" element={<ContactPage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/cart" element={<CartPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/categories" element={<CategoriesPage />} />
             <Route path="/category/:slug" element={<CategoryPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
@@ -98,6 +133,7 @@ export default function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
           <ToastHost />
+          <ConfirmHost />
         </ShopProvider>
       </CatalogProvider>
     </AuthProvider>

@@ -2,6 +2,9 @@
 require_once __DIR__ . "/../config/cors.php";
 require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../helpers/crud.php";
+require_once __DIR__ . "/../helpers/auth.php";
+
+require_admin($pdo); // order history is an internal audit trail, not customer-facing
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && !empty($_GET['orderKey'])) {
     $stmt = $pdo->prepare("SELECT * FROM orderlog WHERE OrderKeyRef = ? ORDER BY CreatedOn DESC");

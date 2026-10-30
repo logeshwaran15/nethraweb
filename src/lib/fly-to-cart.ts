@@ -1,5 +1,13 @@
 export function flyToCart(sourceImg: HTMLImageElement) {
-  const target = document.getElementById("cart-icon-target");
+  const candidates = [
+    document.getElementById("cart-icon-target"),
+    document.getElementById("cart-icon-target-desktop"),
+  ].filter((el): el is HTMLElement => el !== null);
+
+  const target = candidates.find((el) => {
+    const r = el.getBoundingClientRect();
+    return r.width > 0 && r.height > 0;
+  });
   if (!target) return;
 
   const srcRect = sourceImg.getBoundingClientRect();

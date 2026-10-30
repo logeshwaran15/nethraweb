@@ -1,17 +1,30 @@
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, ChevronLeft, ChevronRight, Minus, Plus, Search } from "lucide-react";
+import { useSearchQuery } from "@/components/admin/useSearchQuery";
+import { PageSizeSelect } from "@/components/admin/PageSizeSelect";
+import {
+  AlertTriangle,
+  Boxes,
+  ChevronLeft,
+  ChevronRight,
+  Minus,
+  Package,
+  PackageX,
+  Plus,
+  Search,
+} from "lucide-react";
+import { KpiCard } from "@/components/admin/KpiCard";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAdmin } from "@/lib/admin-store";
 
 const filters = ["All", "Low Stock", "Out of Stock"] as const;
 const LOW_STOCK_THRESHOLD = 10;
-const PAGE_SIZE = 8;
 
 export default function AdminInventory() {
   const { products, saveProduct } = useAdmin();
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useSearchQuery();
   const [filter, setFilter] = useState<(typeof filters)[number]>("All");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   const list = useMemo(
     () =>
@@ -24,10 +37,12 @@ export default function AdminInventory() {
     [products, query, filter],
   );
 
-  const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= LOW_STOCK_THRESHOLD).length;
+  const lowStockCount = products.filter(
+    (p) => p.stock > 0 && p.stock <= LOW_STOCK_THRESHOLD,
+  ).length;
   const outOfStockCount = products.filter((p) => p.stock === 0).length;
 
-  const pageCount = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+  const pageCount = Math.max(1, Math.ceil(list.length / pageSize));
 
   useEffect(() => {
     setPage(1);
@@ -37,35 +52,60 @@ export default function AdminInventory() {
     if (page > pageCount) setPage(pageCount);
   }, [page, pageCount]);
 
-  const paged = useMemo(() => list.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), [list, page]);
+  useEffect(() => {
+    setPage(1);
+  }, [pageSize]);
+
+  const paged = useMemo(
+    () => list.slice((page - 1) * pageSize, page * pageSize),
+    [list, page, pageSize],
+  );
 
   const adjustStock = (id: string, delta: number) => {
     const product = products.find((p) => p.id === id);
     if (!product) return;
-    saveProduct({ ...product, stock: Math.max(0, product.stock + delta) }, product.id);
+    void saveProduct({ ...product, stock: Math.max(0, product.stock + delta) }, product.id, {
+      silent: true,
+    });
   };
 
   return (
     <AdminLayout title="Inventory" subtitle={`${products.length} products tracked`}>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
-          <p className="text-xs font-semibold text-muted-foreground">Total Stock</p>
-          <p className="mt-2 font-display text-2xl text-primary">
-            {products.reduce((s, p) => s + p.stock, 0)}
-          </p>
-        </div>
-        <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
-          <p className="text-xs font-semibold text-muted-foreground">Products</p>
-          <p className="mt-2 font-display text-2xl text-primary">{products.length}</p>
-        </div>
-        <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
-          <p className="text-xs font-semibold text-muted-foreground">Low Stock</p>
-          <p className="mt-2 font-display text-2xl text-primary">{lowStockCount}</p>
-        </div>
-        <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
-          <p className="text-xs font-semibold text-muted-foreground">Out of Stock</p>
-          <p className="mt-2 font-display text-2xl text-primary">{outOfStockCount}</p>
-        </div>
+        <KpiCard
+          label="Total Stock"
+          value={String(products.reduce((s, p) => s + p.stock, 0))}
+          note="units across all products"
+          icon={Boxes}
+          color="emerald"
+          active={filter === "All"}
+          onClick={() => setFilter("All")}
+        />
+        <KpiCard
+          label="Products"
+          value={String(products.length)}
+          note="tracked in inventory"
+          icon={Package}
+          color="sky"
+        />
+        <KpiCard
+          label="Low Stock"
+          value={String(lowStockCount)}
+          note={`1–${LOW_STOCK_THRESHOLD} units left`}
+          icon={AlertTriangle}
+          color="amber"
+          active={filter === "Low Stock"}
+          onClick={() => setFilter(filter === "Low Stock" ? "All" : "Low Stock")}
+        />
+        <KpiCard
+          label="Out of Stock"
+          value={String(outOfStockCount)}
+          note="needs restocking"
+          icon={PackageX}
+          color="red"
+          active={filter === "Out of Stock"}
+          onClick={() => setFilter(filter === "Out of Stock" ? "All" : "Out of Stock")}
+        />
       </div>
 
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -95,7 +135,7 @@ export default function AdminInventory() {
         </div>
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
+      <div className="mt-4 overflow-hidden rounded-sm border border-border bg-card shadow-[var(--shadow-card)]">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[600px] text-left text-sm">
             <thead className="bg-muted/60 text-[11px] uppercase text-muted-foreground">
@@ -112,7 +152,11 @@ export default function AdminInventory() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       {p.image ? (
-                        <img src={p.image} alt={p.name} className="h-10 w-10 rounded-lg object-cover" />
+                        <img
+                          src={p.image}
+                          alt={p.name}
+                          className="h-10 w-10 rounded-lg object-cover"
+                        />
                       ) : (
                         <span className="grid h-10 w-10 place-items-center rounded-lg bg-muted text-[10px] text-muted-foreground">
                           IMG
@@ -173,9 +217,10 @@ export default function AdminInventory() {
 
         <div className="flex flex-col items-center justify-between gap-3 border-t border-border px-4 py-3 sm:flex-row">
           <p className="text-xs text-muted-foreground">
-            Showing {list.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–
-            {Math.min(page * PAGE_SIZE, list.length)} of {list.length}
+            Showing {list.length === 0 ? 0 : (page - 1) * pageSize + 1}–
+            {Math.min(page * pageSize, list.length)} of {list.length}
           </p>
+          <PageSizeSelect value={pageSize} onChange={setPageSize} />
           <div className="flex items-center gap-2">
             <button
               aria-label="Previous page"

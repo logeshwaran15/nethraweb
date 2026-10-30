@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
+import { Req } from "@/components/admin/Req";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAdmin, type DeliveryZone } from "@/lib/admin-store";
 import { inr } from "@/lib/mock-data";
@@ -32,25 +33,12 @@ export default function AdminDelivery() {
     const draft = { ...editing.draft, pincodePrefix: editing.draft.pincodePrefix.trim() };
     if (!draft.zoneName.trim() || !draft.pincodePrefix) return;
     setSaving(true);
-    try {
-      await saveDeliveryZone(draft, editing.originalId);
-      showToast(`Delivery zone "${draft.zoneName}" saved`, "success");
-      setEditing(null);
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : "Failed to save delivery zone", "error");
-    } finally {
-      setSaving(false);
-    }
+    const ok = await saveDeliveryZone(draft, editing.originalId);
+    setSaving(false);
+    if (ok !== false) setEditing(null);
   };
 
-  const remove = async (zone: DeliveryZone) => {
-    try {
-      await deleteDeliveryZone(zone.id);
-      showToast(`Delivery zone "${zone.zoneName}" deleted`, "success");
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : "Failed to delete delivery zone", "error");
-    }
-  };
+  const remove = (zone: DeliveryZone) => deleteDeliveryZone(zone.id);
 
   return (
     <AdminLayout
@@ -70,7 +58,7 @@ export default function AdminDelivery() {
         pick a zone. If no zone matches, the flat shipping fee from Settings → Payment is used instead.
       </p>
 
-      <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
+      <div className="mt-4 overflow-hidden rounded-sm border border-border bg-card shadow-[var(--shadow-card)]">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[720px] text-left text-sm">
             <thead className="bg-muted/60 text-[11px] uppercase text-muted-foreground">
@@ -140,9 +128,9 @@ export default function AdminDelivery() {
       {editing && (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
           <div className="absolute inset-0 bg-foreground/40" onClick={() => setEditing(null)} />
-          <div className="relative max-h-[90vh] w-full overflow-y-auto rounded-t-3xl bg-card p-5 sm:max-w-lg sm:rounded-3xl">
+          <div className="relative max-h-[90vh] w-full overflow-y-auto rounded-t-sm bg-card p-5 sm:max-w-lg sm:rounded-sm">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-xl text-primary">
+              <h2 className="font-sans text-xl text-primary">
                 {editing.originalId ? "Edit Delivery Zone" : "Add Delivery Zone"}
               </h2>
               <button aria-label="Close" onClick={() => setEditing(null)}>
@@ -152,7 +140,7 @@ export default function AdminDelivery() {
 
             <div className="space-y-3">
               <label className="block">
-                <span className={labelCls}>Zone Name</span>
+                <span className={labelCls}>Zone Name<Req /></span>
                 <input
                   className={inputCls}
                   placeholder="e.g. Coimbatore Local"
@@ -164,7 +152,7 @@ export default function AdminDelivery() {
               </label>
 
               <label className="block">
-                <span className={labelCls}>Pincode Prefix</span>
+                <span className={labelCls}>Pincode Prefix<Req /></span>
                 <input
                   className={`${inputCls} font-mono`}
                   placeholder="e.g. 641 or 641002"
@@ -231,6 +219,7 @@ export default function AdminDelivery() {
                   <input
                     type="number"
                     className={inputCls}
+                    placeholder="Enter sort order"
                     value={editing.draft.sortOrder}
                     onChange={(e) =>
                       setEditing({

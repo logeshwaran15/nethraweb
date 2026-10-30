@@ -1,76 +1,235 @@
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { IndianRupee, Package, ShoppingBag, TrendingUp, AlertTriangle } from "lucide-react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useAdmin } from "@/lib/admin-store";
-import { inr, mockOrders } from "@/lib/mock-data";
+import { apiGet } from "@/lib/api";
+import { inr } from "@/lib/mock-data";
 
-const salesByDay = [
-  { day: "Mon", value: 42 },
-  { day: "Tue", value: 68 },
-  { day: "Wed", value: 55 },
-  { day: "Thu", value: 82 },
-  { day: "Fri", value: 96 },
-  { day: "Sat", value: 74 },
-  { day: "Sun", value: 61 },
+type OrderRow = {
+  Orderkey: string;
+  OrderNumber: string;
+  Status: "Processing" | "Shipped" | "Delivered" | "Cancelled";
+  Total: string | number;
+  CreatedOn: string;
+};
+
+const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const KPI_TONES = [
+  {
+    card: "border-emerald-200 from-emerald-50 to-white",
+    bar: "bg-emerald-500",
+    text: "text-emerald-700",
+    chip: "from-emerald-400 to-emerald-600 text-white",
+  },
+  {
+    card: "border-sky-200 from-sky-50 to-white",
+    bar: "bg-sky-500",
+    text: "text-sky-700",
+    chip: "from-sky-400 to-blue-600 text-white",
+  },
+  {
+    card: "border-violet-200 from-violet-50 to-white",
+    bar: "bg-violet-500",
+    text: "text-violet-700",
+    chip: "from-violet-400 to-purple-600 text-white",
+  },
+  {
+    card: "border-rose-200 from-rose-50 to-white",
+    bar: "bg-rose-500",
+    text: "text-rose-700",
+    chip: "from-amber-400 to-rose-500 text-white",
+  },
 ];
 
 export default function AdminDashboard() {
   const { products, categories } = useAdmin();
-  const revenue = mockOrders.reduce((s, o) => s + o.total, 0);
+  const [orders, setOrders] = useState<OrderRow[] | null>(null);
+
+  useEffect(() => {
+    apiGet<OrderRow[]>("/api/orders.php")
+      .then(setOrders)
+      .catch(() => setOrders([]));
+  }, []);
+
+  const revenue = useMemo(() => (orders ?? []).reduce((s, o) => s + Number(o.Total), 0), [orders]);
+  const pending = (orders ?? []).filter((o) => o.Status === "Processing").length;
   const lowStock = products.filter((p) => p.stock <= 8);
 
-  const stats = [
-    { label: "Revenue", value: inr(revenue), icon: IndianRupee, note: "+12.4% this week" },
-    { label: "Orders", value: String(mockOrders.length), icon: ShoppingBag, note: "2 pending" },
-    { label: "Products", value: String(products.length), icon: Package, note: `${categories.length} categories` },
-    { label: "Conversion", value: "3.8%", icon: TrendingUp, note: "+0.6% vs last week" },
-  ];
+  // Last 7 calendar days ending today, oldest first.
+  const salesByDay = useMemo(() => {
+    const days = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - (6 - i));
+      return {
+        key: d.toDateString(),
+        day: i === 6 ? "Today" : `${DAY_LABELS[d.getDay()]} ${d.getDate()}`,
+        value: 0,
+        orders: 0,
+      };
+    });
+    for (const o of orders ?? []) {
+      const created = new Date(o.CreatedOn.replace(" ", "T"));
+      const slot = days.find((d) => d.key === created.toDateString());
+      if (slot) {
+        slot.value += Number(o.Total);
+        slot.orders += 1;
+      }
+    }
+    return days;
+  }, [orders]);
 
-  const max = Math.max(...salesByDay.map((d) => d.value));
+  const loading = orders === null;
+  const weekTotal = salesByDay.reduce((s, d) => s + d.value, 0);
+  const weekOrders = salesByDay.reduce((s, d) => s + d.orders, 0);
+
+  const stats = [
+    {
+      label: "Revenue",
+      value: loading ? "…" : inr(revenue),
+      icon: IndianRupee,
+      note: `${orders?.length ?? 0} orders total`,
+    },
+    {
+      label: "Orders",
+      value: loading ? "…" : String(orders?.length ?? 0),
+      icon: ShoppingBag,
+      note: `${pending} pending`,
+    },
+    {
+      label: "Products",
+      value: String(products.length),
+      icon: Package,
+      note: `${categories.length} categories`,
+    },
+    {
+      label: "Low Stock",
+      value: String(lowStock.length),
+      icon: AlertTriangle,
+      note: "items at ≤8 units",
+    },
+  ];
 
   return (
     <AdminLayout title="Dashboard" subtitle="Overview of your store performance">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {stats.map((s) => (
-          <div
-            key={s.label}
-            className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]"
-          >
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold text-muted-foreground">{s.label}</p>
-              <s.icon className="h-4 w-4 text-primary" />
+        {stats.map((s, i) => {
+          const t = KPI_TONES[i % KPI_TONES.length]!;
+          return (
+            <div
+              key={s.label}
+              className={`group relative overflow-hidden rounded-2xl border-2 bg-gradient-to-br p-3.5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${t.card}`}
+            >
+              <span
+                className={`pointer-events-none absolute -right-5 -top-5 h-16 w-16 rounded-full opacity-20 ${t.bar}`}
+              />
+              <div className="relative flex items-center gap-3">
+                <span
+                  className={`grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br shadow-sm ${t.chip}`}
+                >
+                  <s.icon className="h-5 w-5" />
+                </span>
+                <div className="min-w-0">
+                  <p className={`text-[11px] font-bold uppercase tracking-wide ${t.text}`}>
+                    {s.label}
+                  </p>
+                  <p className="truncate font-sans text-3xl font-extrabold leading-tight text-[#2D2525]">
+                    {s.value}
+                  </p>
+                </div>
+              </div>
+              <p className="relative mt-2 truncate text-[11px] font-medium text-muted-foreground">
+                {s.note}
+              </p>
             </div>
-            <p className="mt-2 font-display text-2xl text-primary">{s.value}</p>
-            <p className="mt-1 text-[11px] text-success">{s.note}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
         <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] lg:col-span-2">
-          <h2 className="text-sm font-bold">Sales this week</h2>
-          <div className="mt-5 flex h-44 items-end gap-3">
-            {salesByDay.map((d) => (
-              <div key={d.day} className="flex flex-1 flex-col items-center gap-2">
-                <div
-                  className="w-full rounded-t-lg bg-primary/85"
-                  style={{ height: `${(d.value / max) * 100}%` }}
-                />
-                <span className="text-[11px] text-muted-foreground">{d.day}</span>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-bold">Sales this week</h2>
+              <p className="text-[11px] text-muted-foreground">Revenue over the last 7 days</p>
+            </div>
+            {!loading && (
+              <div className="text-right">
+                <p className="font-sans text-xl font-extrabold leading-tight text-primary">
+                  {inr(weekTotal)}
+                </p>
+                <p className="text-[11px] text-muted-foreground">{weekOrders} orders</p>
               </div>
-            ))}
+            )}
           </div>
+          {loading ? (
+            <p className="mt-5 text-xs text-muted-foreground">Loading…</p>
+          ) : weekTotal === 0 ? (
+            <p className="mt-5 text-xs text-muted-foreground">No sales in the last 7 days.</p>
+          ) : (
+            <div className="mt-4 h-52 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={salesByDay} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="salesFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.35} />
+                      <stop offset="100%" stopColor="var(--primary)" stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                  <XAxis
+                    dataKey="day"
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                  />
+                  <YAxis
+                    width={44}
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                    tickFormatter={(v: number) => (v >= 1000 ? `₹${v / 1000}k` : `₹${v}`)}
+                  />
+                  <Tooltip
+                    cursor={{ stroke: "var(--primary)", strokeDasharray: "3 3" }}
+                    contentStyle={{ borderRadius: 12, fontSize: 12 }}
+                    formatter={(v: number, _n, p) => [
+                      `${inr(v)} · ${p.payload.orders} order(s)`,
+                      "Sales",
+                    ]}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke="var(--primary)"
+                    strokeWidth={2.5}
+                    fill="url(#salesFill)"
+                    dot={{ r: 3, fill: "var(--primary)", strokeWidth: 0 }}
+                    activeDot={{ r: 5 }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
+        <div className="rounded-sm border border-border bg-card p-4 shadow-[var(--shadow-card)]">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-bold">Low stock</h2>
           </div>
-          <ul className="mt-3 space-y-2">
+          <ul className="mt-3 max-h-48 space-y-2 overflow-y-auto pr-1">
             {lowStock.map((p) => (
-              <li key={p.id} className="flex items-center gap-2 rounded-xl bg-muted/60 p-2">
-                <img src={p.image} alt={p.name} className="h-9 w-9 rounded-lg object-cover" />
+              <li key={p.id} className="flex items-center gap-2 rounded-sm bg-muted/60 p-2">
+                <img
+                  src={p.image}
+                  alt={p.name}
+                  loading="lazy"
+                  className="h-9 w-9 rounded-sm object-cover"
+                />
                 <span className="line-clamp-1 flex-1 text-xs font-semibold">{p.name}</span>
                 <span className="text-xs font-bold text-primary">{p.stock}</span>
               </li>
@@ -85,38 +244,6 @@ export default function AdminDashboard() {
           >
             Manage products
           </Link>
-        </div>
-      </div>
-
-      <div className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
-        <h2 className="text-sm font-bold">Recent orders</h2>
-        <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[520px] text-left text-sm">
-            <thead className="text-[11px] uppercase text-muted-foreground">
-              <tr>
-                <th className="pb-2">Order</th>
-                <th className="pb-2">Date</th>
-                <th className="pb-2">Items</th>
-                <th className="pb-2">Status</th>
-                <th className="pb-2 text-right">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {mockOrders.map((o) => (
-                <tr key={o.id} className="border-t border-border">
-                  <td className="py-2.5 font-semibold">{o.id}</td>
-                  <td className="py-2.5 text-muted-foreground">{o.date}</td>
-                  <td className="py-2.5 text-muted-foreground">{o.items.length}</td>
-                  <td className="py-2.5">
-                    <span className="rounded-full bg-accent px-2 py-0.5 text-[11px] font-semibold text-accent-foreground">
-                      {o.status}
-                    </span>
-                  </td>
-                  <td className="py-2.5 text-right font-bold text-primary">{inr(o.total)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       </div>
     </AdminLayout>

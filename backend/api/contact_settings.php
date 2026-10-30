@@ -2,8 +2,10 @@
 require_once __DIR__ . "/../config/cors.php";
 require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../helpers/response.php";
+require_once __DIR__ . "/../helpers/auth.php";
 
 $method = $_SERVER['REQUEST_METHOD'];
+if ($method === 'PUT') require_admin($pdo);
 $columns = ["SupportEmail", "SupportPhone", "WhatsappNumber", "Address", "InstagramUrl", "FacebookUrl"];
 
 $row = $pdo->query("SELECT * FROM contactsettings LIMIT 1")->fetch();

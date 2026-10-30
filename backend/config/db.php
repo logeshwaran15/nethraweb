@@ -4,7 +4,7 @@
 // backend/config/db.local.php (gitignored — never commit real credentials).
 $DB_HOST = getenv("DB_HOST") ?: "127.0.0.1";
 $DB_PORT = getenv("DB_PORT") ?: "3307";
-$DB_NAME = getenv("DB_NAME") ?: "nethras_db";
+$DB_NAME = getenv("DB_NAME") ?: "nethrasv2";
 $DB_USER = getenv("DB_USER") ?: "root";
 $DB_PASS = getenv("DB_PASS") ?: "";
 

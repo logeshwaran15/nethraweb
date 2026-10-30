@@ -1,6 +1,6 @@
-# Nethra's Mehndi Glow
+# Nethra's Mehandi Glow
 
-Build a frontend-only, mobile-first e-commerce UI demo for Nethra’s Mehndi Stencils & Accessories, based on the attached reference image.
+Build a frontend-only, mobile-first e-commerce UI demo for Nethra’s Mehandi Stencils & Accessories, based on the attached reference image.
 
 Use a premium cream + blush pink + maroon + gold design with elegant typography, rounded cards, clean spacing, and attractive product images.
 
@@ -10,7 +10,7 @@ Home → Categories → Product Details → Cart → Checkout → Payment → Or
 
 Include both product types:
 
-Mehndi Stencils
+Mehandi Stencils
 
 Hair Clips, Invisible Chains & Accessories
 
